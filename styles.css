@@ -1,0 +1,244 @@
+/* =============================================================================
+   跨境电商美客多（MercadoLibre）巴西站利润计算器 - 样式表
+   ============================================================================= */
+
+* {
+    box-sizing: border-box;
+    font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+body {
+    background: #f0f2f5;
+    margin: 0;
+    padding: 24px 16px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* 主卡片 */
+.calculator-card {
+    background: white;
+    border-radius: 32px;
+    box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.header {
+    background: linear-gradient(135deg, #0b2b26 0%, #1a4a44 100%);
+    color: white;
+    padding: 28px 32px;
+}
+
+.header h1 {
+    margin: 0 0 8px;
+    font-weight: 600;
+    font-size: 1.9rem;
+    letter-spacing: -0.3px;
+}
+
+.header p {
+    margin: 0;
+    opacity: 0.85;
+    font-size: 0.95rem;
+}
+
+.badge {
+    background: rgba(255,255,255,0.2);
+    border-radius: 60px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    display: inline-block;
+    margin-top: 12px;
+}
+
+.content {
+    padding: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+}
+
+.input-panel {
+    flex: 1.2;
+    min-width: 280px;
+}
+
+.result-panel {
+    flex: 0.9;
+    min-width: 280px;
+    background: #f9fafc;
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03), 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.section-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 0 0 18px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title i {
+    font-style: normal;
+    font-size: 1.3rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px 24px;
+    margin-bottom: 28px;
+}
+
+.input-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-field label {
+    font-weight: 500;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #2c3e2f;
+    background: #eff3f6;
+    padding: 2px 8px;
+    border-radius: 20px;
+    align-self: flex-start;
+}
+
+.input-field input, .input-field select {
+    background: white;
+    border: 1px solid #cfdfe5;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    transition: 0.2s;
+    outline: none;
+    font-weight: 500;
+}
+
+.input-field input:focus, .input-field select:focus {
+    border-color: #1a7f6e;
+    box-shadow: 0 0 0 3px rgba(26,127,110,0.2);
+}
+
+.input-field .unit-hint {
+    font-size: 0.7rem;
+    color: #5b6e6b;
+    margin-left: 8px;
+}
+
+.row-double {
+    grid-column: span 2;
+}
+
+.param-group {
+    background: #ffffffea;
+    border-radius: 24px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    border: 1px solid #e9edf2;
+}
+
+.param-title {
+    font-weight: 600;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    color: #1e4a3b;
+}
+
+.result-card {
+    background: white;
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    border: 1px solid #eef2f6;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 12px 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-label {
+    font-weight: 500;
+    color: #2d3e3a;
+}
+
+.result-value {
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: -0.2px;
+}
+
+.profit-positive {
+    color: #15803d;
+}
+
+.profit-negative {
+    color: #b91c1c;
+}
+
+.highlight-bg {
+    background: #eef9f2;
+    border-radius: 20px;
+    padding: 8px 14px;
+    margin-top: 12px;
+}
+
+.button-reset {
+    background: none;
+    border: 1px solid #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 16px;
+    width: 100%;
+    background: white;
+}
+
+.button-reset:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: #5f6c6a;
+}
+
+@media (max-width: 780px) {
+    .content { padding: 20px; }
+    .result-value { font-size: 1.1rem; }
+}
+
+.inline-code {
+    background: #eef2ff;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-family: monospace;
+    font-size: 0.75rem;
+}

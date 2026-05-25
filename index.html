@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>跨境电商利润计算器 | 美客多巴西站模拟</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="calculator-card">
+            <div class="header">
+                <h1>📊 巴西·美客多利润测算器</h1>
+                <p>基于「开发表」核心算法 | 支持普货/灰清双模式 | 自动计算毛利 & 毛利率</p>
+                <div class="badge">⚡ 实时计算 · 体积重头程 · 佣金+广告+税点全包含</div>
+            </div>
+            <div class="content">
+                <!-- 左侧输入区 -->
+                <div class="input-panel">
+                    <div class="section-title">
+                        <span>📦 产品与物流基础</span>
+                    </div>
+                    <div class="input-field">
+                        <label>🔗 竞品链接</label>
+                        <input type="url" id="competitorLink" value="" placeholder="https://...">
+                        <span class="unit-hint">MercadoLibre 竞品页面</span>
+                    </div>
+                    <div class="input-field">
+                        <label>📦 备货链接</label>
+                        <input type="url" id="stockLink" value="" placeholder="https://...">
+                        <span class="unit-hint">供应商/备货链接</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="input-field">
+                            <label>📏 长 (cm)</label>
+                            <input type="number" id="length" value="52.5" step="0.1" placeholder="cm">
+                        </div>
+                        <div class="input-field">
+                            <label>📐 宽 (cm)</label>
+                            <input type="number" id="width" value="39.5" step="0.1" placeholder="cm">
+                        </div>
+                        <div class="input-field">
+                            <label>📏 高 (cm)</label>
+                            <input type="number" id="height" value="44.5" step="0.1" placeholder="cm">
+                        </div>
+                        <div class="input-field">
+                            <label>📦 装箱数 (PCS/箱)</label>
+                            <input type="number" id="packQty" value="10" step="1" min="1">
+                        </div>
+                        <div class="input-field">
+                            <label>⚖️ 箱毛重 (kg)</label>
+                            <input type="number" id="boxWeight" value="17" step="0.1">
+                            <span class="unit-hint">整箱重量，用于单件重量</span>
+                        </div>
+                        <div class="input-field">
+                            <label>🏭 产品单价 (RMB)</label>
+                            <input type="number" id="productCost" value="67" step="1">
+                            <span class="unit-hint">采购成本 / 出厂价</span>
+                        </div>
+                        <div class="input-field">
+                            <label>💵 预计售价 (当地币种 BRL)</label>
+                            <input type="number" id="sellPrice" value="249" step="5">
+                            <span class="unit-hint">巴西雷亚尔 (R$)</span>
+                        </div>
+                        <div class="input-field">
+                            <label>🚚 头程方式</label>
+                            <select id="shippingType">
+                                <option value="灰清">灰清 (体积重计费系数6100)</option>
+                                <option value="普货">普货 (体积重计费系数5100)</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-title">💰 费率 & 平台成本 (%)</div>
+                        <div class="form-grid" style="margin-bottom: 8px;">
+                            <div class="input-field">
+                                <label>佣金率</label>
+                                <input type="number" id="commissionRate" value="16.5" step="0.5"> %
+                            </div>
+                            <div class="input-field">
+                                <label>广告费率</label>
+                                <input type="number" id="adRate" value="3" step="0.5"> %
+                            </div>
+                            <div class="input-field">
+                                <label>预估税点</label>
+                                <input type="number" id="taxRate" value="5" step="0.5"> %
+                            </div>
+                            <div class="input-field">
+                                <label>💰 汇率 (RMB → BRL)</label>
+                                <input type="number" id="exchangeRate" value="1.30" step="0.01">
+                                <span class="unit-hint">自动获取实时汇率 (BRL→CNY)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-title">📬 末端费用 (巴西当地, BRL)</div>
+                        <div class="form-grid">
+                            <div class="input-field">
+                                <label>操作费 + 出库费</label>
+                                <input type="number" id="operationFee" value="0" step="0.5" placeholder="BRL">
+                                <span class="unit-hint">平台操作费/处理费</span>
+                            </div>
+                            <div class="input-field">
+                                <label>尾程配送费</label>
+                                <input type="number" id="lastMileFee" value="0" step="0.5" placeholder="BRL">
+                                <span class="unit-hint">按重量/售价范围填入</span>
+                            </div>
+                            <div class="input-field">
+                                <label>其他杂费 (BRL)</label>
+                                <input type="number" id="otherFee" value="0" step="0.5" placeholder="BRL">
+                            </div>
+                        </div>
+                        <div class="highlight-bg" style="font-size:0.75rem; margin-top:12px;">
+                            💡 提示：若实际尾程+操作费已知，直接填总“末端总费用”更方便。以上三者会自动求和。
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-title">📦 备货量 & 体积 (参考)</div>
+                        <div class="form-grid">
+                            <div class="input-field">
+                                <label>备货量 (PCS)</label>
+                                <input type="number" id="stockQty" value="500" step="50">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="button-reset" id="resetBtn">⟳ 重置为默认产品 (太阳能路灯)</button>
+                </div>
+
+                <!-- 右侧结果区 -->
+                <div class="result-panel">
+                    <div class="section-title">
+                        <span>📈 利润分析 (人民币)</span>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-item">
+                            <span class="result-label">📦 单件体积重头程费</span>
+                            <span class="result-value" id="headFeeDisplay">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">⚙️ 单件重量 (kg)</span>
+                            <span class="result-value" id="unitWeightDisplay">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📐 单件体积 (m³)</span>
+                            <span class="result-value" id="unitVolDisplay">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">💰 人民币总收入 (单件)</span>
+                            <span class="result-value" id="totalRevenue">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📉 平台费用小计 (佣金+广告+税点) BRL</span>
+                            <span class="result-value" id="platformFeeBRL">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📬 末端总费用 BRL → RMB</span>
+                            <span class="result-value" id="lastmileTotal">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">🏭 单件总成本 (RMB)</span>
+                            <span class="result-value" id="totalCost">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">✨ 单件毛利 (RMB)</span>
+                            <span class="result-value" id="grossProfit">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📊 毛利率</span>
+                            <span class="result-value" id="marginRate">—</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-item">
+                            <span class="result-label">📦 备货总货值 (RMB)</span>
+                            <span class="result-value" id="totalStockValue">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">�� 总体积 CBM</span>
+                            <span class="result-value" id="totalCBM">—</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📦 总箱数</span>
+                            <span class="result-value" id="totalBoxes">—</span>
+                        </div>
+                    </div>
+                    <div class="highlight-bg" style="margin-top: 12px; background:#eaf8ff;">
+                        ✅ 计算逻辑：<br>
+                        头程费(普货/灰清) = (长×宽×高) × 系数 / 1,000,000 / 装箱数<br>
+                        总成本RMB = [售价×(佣金+广告+税点) + 末端总费用] × 汇率 + 产品单价 + 头程费<br>
+                        毛利 = 售价×汇率 - 总成本 &nbsp;&nbsp;毛利率 = 毛利 / (售价×汇率)
+                    </div>
+                </div>
+            </div>
+            <footer>基于巴西美客多常见规则 · 参数可灵活调整 | 头程系数普货5100 / 灰清6100 (体积重传统算法)</footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
