@@ -1,1 +1,838 @@
-<h1>hello world</h1>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Angrysl · 全栈开发者</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+      background: #0a0c0f;
+      color: #e0e0e0;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      position: relative;
+    }
+
+    /* 粒子画布背景 */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* 自定义滚动条 */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #12161c;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4f46e5;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #4f46e5;
+    }
+
+    /* 导航栏 */
+    .navbar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(90%, 700px);
+      background: rgba(18, 22, 28, 0.7);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 60px;
+      padding: 12px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      transition: all 0.3s ease;
+    }
+
+    .navbar.scrolled {
+      background: rgba(10, 12, 15, 0.85);
+      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #4f46e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #b0b8c5;
+      font-weight: 500;
+      position: relative;
+      padding: 5px 0;
+      transition: color 0.3s;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: #a78bfa;
+      box-shadow: 0 0 10px #a78bfa;
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #ffffff;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    /* 主体容器 */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 30px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* 英雄区域 */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    .glitch-text {
+      font-size: clamp(3.5rem, 10vw, 6rem);
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(167, 139, 250, 0.7);
+      position: relative;
+      display: inline-block;
+    }
+
+    /* 霓虹灯打字效果容器 */
+    .typewriter {
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-top: 15px;
+      color: #c4b5fd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .static-text {
+      color: #9ca3af;
+    }
+
+    .dynamic-text {
+      color: #a78bfa;
+      font-weight: 600;
+      border-right: 3px solid #a78bfa;
+      padding-right: 5px;
+      animation: blinkCursor 0.8s infinite;
+      white-space: nowrap;
+    }
+
+    @keyframes blinkCursor {
+      0%, 100% { border-color: #a78bfa; }
+      50% { border-color: transparent; }
+    }
+
+    .hero-sub {
+      margin-top: 30px;
+      font-size: 1.2rem;
+      color: #9ca3af;
+      max-width: 600px;
+      line-height: 1.7;
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(5px);
+      padding: 20px 30px;
+      border-radius: 20px;
+      border: 1px solid rgba(167, 139, 250, 0.15);
+    }
+
+    .cta-button {
+      margin-top: 40px;
+      padding: 14px 40px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(124, 58, 237, 0.7);
+      background: linear-gradient(135deg, #5b51e8, #8b5cf6);
+    }
+
+    /* 通用区块标题 */
+    .section-title {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 50px;
+      text-align: center;
+      color: #ffffff;
+      position: relative;
+    }
+
+    .section-title span {
+      background: linear-gradient(135deg, #a78bfa, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* 关于我卡片 */
+    .about-section {
+      padding: 100px 0;
+    }
+
+    .glass-card {
+      background: rgba(20, 25, 35, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      border-radius: 32px;
+      padding: 50px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      align-items: center;
+      box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+
+    .glass-card:hover {
+      transform: scale(1.01);
+      border-color: rgba(167, 139, 250, 0.5);
+    }
+
+    .avatar {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #a78bfa);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      color: white;
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+      flex-shrink: 0;
+    }
+
+    .about-text {
+      flex: 1;
+    }
+
+    .about-text h3 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: #e2e8f0;
+    }
+
+    .about-text p {
+      color: #b0b8c5;
+      line-height: 1.8;
+      font-size: 1.05rem;
+    }
+
+    /* 技能条 */
+    .skills-section {
+      padding: 60px 0 100px;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+    }
+
+    .skill-item {
+      background: rgba(20, 25, 35, 0.5);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 25px;
+    }
+
+    .skill-name {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: #1e293b;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4f46e5, #a78bfa);
+      border-radius: 10px;
+      box-shadow: 0 0 15px #8b5cf6;
+      transition: width 1.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    /* 作品卡片 */
+    .projects-section {
+      padding: 60px 0 100px;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .project-card {
+      background: rgba(20, 25, 35, 0.5);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(167, 139, 250, 0.15);
+      border-radius: 24px;
+      padding: 30px;
+      transition: all 0.4s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .project-card:hover::before {
+      left: 100%;
+    }
+
+    .project-card:hover {
+      transform: translateY(-12px);
+      border-color: #a78bfa;
+      box-shadow: 0 25px 40px rgba(79, 70, 229, 0.4);
+    }
+
+    .project-icon {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .project-card h3 {
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+      color: #e2e8f0;
+    }
+
+    .project-card p {
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+
+    /* 联系区域 */
+    .contact-section {
+      padding: 60px 0 100px;
+    }
+
+    .contact-form {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(20, 25, 35, 0.5);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      border-radius: 30px;
+      padding: 40px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #c4b5fd;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px 18px;
+      background: #0f1319;
+      border: 1px solid #2d3340;
+      border-radius: 14px;
+      color: #e0e0e0;
+      font-size: 1rem;
+      transition: all 0.3s;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(135deg, #5b51e8, #8b5cf6);
+      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.6);
+    }
+
+    /* 页脚 */
+    .footer {
+      text-align: center;
+      padding: 30px;
+      color: #64748b;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* 回到顶部 */
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: #4f46e5;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 5px 20px rgba(79, 70, 229, 0.6);
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* 动画触发隐藏 */
+    .hidden-animate {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .show-animate {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 10px 20px;
+        width: 95%;
+      }
+      .nav-links {
+        gap: 12px;
+        font-size: 0.9rem;
+      }
+      .glass-card {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 粒子画布 -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- 导航栏 -->
+  <nav class="navbar" id="navbar">
+    <div class="logo">⟨A/⟩</div>
+    <ul class="nav-links">
+      <li><a href="#home">首页</a></li>
+      <li><a href="#about">关于</a></li>
+      <li><a href="#skills">技能</a></li>
+      <li><a href="#projects">项目</a></li>
+      <li><a href="#contact">联系</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <!-- 英雄区 -->
+    <section id="home" class="hero">
+      <h1 class="glitch-text">Angrysl</h1>
+      <div class="typewriter">
+        <span class="static-text">我是一名</span>
+        <span class="dynamic-text" id="typing-text"></span>
+      </div>
+      <p class="hero-sub">用代码编织未来，追求极致交互体验的全栈开发者。<br>热衷于探索前沿技术与可视化美学。</p>
+      <a href="#contact" class="cta-button">与我联系</a>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about" class="about-section hidden-animate">
+      <h2 class="section-title"><span>关 于 我</span></h2>
+      <div class="glass-card">
+        <div class="avatar">👨‍💻</div>
+        <div class="about-text">
+          <h3>你好，我是 Angrysl</h3>
+          <p>拥有5年Web开发经验，专注于React、Node.js及云原生架构。相信优秀的设计源于对细节的偏执。工作之余，我喜欢研究创意编程与生成艺术，并持续输出技术文章。目前正在构建下一代低代码平台，让创造更简单。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 技能 -->
+    <section id="skills" class="skills-section hidden-animate">
+      <h2 class="section-title"><span>技 术 栈</span></h2>
+      <div class="skills-grid">
+        <div class="skill-item">
+          <div class="skill-name"><span>React / Vue</span><span>90%</span></div>
+          <div class="progress-bar"><div class="progress-fill" data-width="90%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name"><span>Node.js</span><span>85%</span></div>
+          <div class="progress-bar"><div class="progress-fill" data-width="85%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name"><span>TypeScript</span><span>88%</span></div>
+          <div class="progress-bar"><div class="progress-fill" data-width="88%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name"><span>CSS / 动画</span><span>92%</span></div>
+          <div class="progress-bar"><div class="progress-fill" data-width="92%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name"><span>Python</span><span>75%</span></div>
+          <div class="progress-bar"><div class="progress-fill" data-width="75%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name"><span>Cloud & DevOps</span><span>80%</span></div>
+          <div class="progress-bar"><div class="progress-fill" data-width="80%"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 项目作品 -->
+    <section id="projects" class="projects-section hidden-animate">
+      <h2 class="section-title"><span>精 选 项 目</span></h2>
+      <div class="project-grid">
+        <div class="project-card">
+          <div class="project-icon">⚡</div>
+          <h3>实时协作白板</h3>
+          <p>基于WebSocket与Canvas的多人实时绘图工具，支持画笔、图形与便签，延迟低于50ms。</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">🧠</div>
+          <h3>AI 代码审查助手</h3>
+          <p>集成GPT-4的自动化Code Review工具，可分析PR并给出优化建议，提升代码质量。</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">🎨</div>
+          <h3>创意生成器</h3>
+          <p>用算法生成独特视觉图案，支持导出SVG/PNG，探索数学与艺术的交叉点。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 联系 -->
+    <section id="contact" class="contact-section hidden-animate">
+      <h2 class="section-title"><span>联 系 我</span></h2>
+      <form class="contact-form" id="contactForm">
+        <div class="form-group">
+          <label>姓名</label>
+          <input type="text" placeholder="你的名字" required>
+        </div>
+        <div class="form-group">
+          <label>邮箱</label>
+          <input type="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>消息</label>
+          <textarea rows="5" placeholder="说点什么吧..." required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">发送消息</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Angrysl · 由创造力驱动</p>
+  </footer>
+
+  <button class="back-to-top" id="backToTop">↑</button>
+
+  <script>
+    (function() {
+      // ---------- 粒子背景 ----------
+      const canvas = document.getElementById('particle-canvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      class Particle {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.size = Math.random() * 2.5 + 0.8;
+          this.speedX = (Math.random() - 0.5) * 0.6;
+          this.speedY = (Math.random() - 0.5) * 0.6;
+          this.opacity = Math.random() * 0.5 + 0.2;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+            this.reset();
+          }
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(167, 139, 250, ${this.opacity})`;
+          ctx.shadowColor = '#a78bfa';
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.shadowBlur = 0; // reset for performance
+        }
+      }
+
+      function createParticles(count) {
+        particles = [];
+        for (let i = 0; i < count; i++) {
+          particles.push(new Particle());
+        }
+      }
+
+      function connectParticles() {
+        const maxDistance = 130;
+        for (let a = 0; a < particles.length; a++) {
+          for (let b = a + 1; b < particles.length; b++) {
+            const dx = particles[a].x - particles[b].x;
+            const dy = particles[a].y - particles[b].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < maxDistance) {
+              ctx.beginPath();
+              ctx.moveTo(particles[a].x, particles[a].y);
+              ctx.lineTo(particles[b].x, particles[b].y);
+              ctx.strokeStyle = `rgba(139, 92, 246, ${0.08 * (1 - distance / maxDistance)})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      function animateParticles() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+          p.update();
+          p.draw();
+        });
+        connectParticles();
+        requestAnimationFrame(animateParticles);
+      }
+
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+        createParticles(Math.floor((width * height) / 11000));
+      });
+
+      resizeCanvas();
+      createParticles(Math.floor((width * height) / 11000));
+      animateParticles();
+
+      // ---------- 打字机效果 ----------
+      const typingElement = document.getElementById('typing-text');
+      const words = ['全栈开发者', '创意工程师', '开源贡献者', '终身学习者'];
+      let wordIndex = 0;
+      let charIndex = 0;
+      let isDeleting = false;
+      let typeSpeed = 120;
+
+      function typeEffect() {
+        const currentWord = words[wordIndex];
+        if (isDeleting) {
+          typingElement.textContent = currentWord.substring(0, charIndex - 1);
+          charIndex--;
+          typeSpeed = 60;
+        } else {
+          typingElement.textContent = currentWord.substring(0, charIndex + 1);
+          charIndex++;
+          typeSpeed = 120;
+        }
+
+        if (!isDeleting && charIndex === currentWord.length) {
+          typeSpeed = 2000; // 停顿
+          isDeleting = true;
+        } else if (isDeleting && charIndex === 0) {
+          isDeleting = false;
+          wordIndex = (wordIndex + 1) % words.length;
+          typeSpeed = 500;
+        }
+        setTimeout(typeEffect, typeSpeed);
+      }
+
+      typeEffect();
+
+      // ---------- 导航栏滚动效果 ----------
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+
+      // ---------- 滚动显示动画 (Intersection Observer) ----------
+      const hiddenElements = document.querySelectorAll('.hidden-animate');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('show-animate');
+            // 技能条动画触发
+            const progressFills = entry.target.querySelectorAll('.progress-fill');
+            progressFills.forEach(fill => {
+              const width = fill.getAttribute('data-width');
+              if (width) fill.style.width = width;
+            });
+          }
+        });
+      }, { threshold: 0.15 });
+
+      hiddenElements.forEach(el => observer.observe(el));
+
+      // 手动触发一次可见元素（刚加载时可能在视野内）
+      window.addEventListener('load', () => {
+        hiddenElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight - 100 && rect.bottom > 0) {
+            el.classList.add('show-animate');
+            const progressFills = el.querySelectorAll('.progress-fill');
+            progressFills.forEach(fill => {
+              const width = fill.getAttribute('data-width');
+              if (width) fill.style.width = width;
+            });
+          }
+        });
+      });
+
+      // ---------- 回到顶部按钮 ----------
+      const backToTopBtn = document.getElementById('backToTop');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 500) {
+          backToTopBtn.classList.add('visible');
+        } else {
+          backToTopBtn.classList.remove('visible');
+        }
+      });
+
+      backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      // ---------- 联系表单防默认 ----------
+      document.getElementById('contactForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('消息已发送！（演示模式）');
+        e.target.reset();
+      });
+
+      // 平滑滚动导航 (针对哈希链接)
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
