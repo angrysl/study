@@ -297,13 +297,13 @@
                 <td><input type="number" class="site-price-input" data-site="${site.code}" value="${sitePrice}" step="1" style="width: 80px; padding: 4px; text-align: center;"></td>
                 <td>${formatCurrency(result.discountedPrice, site.code)}</td>
                 <td>¥ ${result.discountedPriceCNY.toFixed(2)}</td>
-                <td>${formatCurrency(result.platformFee, site.code)} (¥ ${(result.platformFee / result.exchangeRate).toFixed(2)})</td>
-                <td>${formatCurrency(result.customsDuty, site.code)} (¥ ${(result.customsDuty / result.exchangeRate).toFixed(2)})</td>
-                <td>${formatCurrency(result.shippingLocal, site.code)} (¥ ${(result.shippingLocal / result.exchangeRate).toFixed(2)})</td>
-                <td>${formatCurrency(result.agentLocal, site.code)} (¥ ${(result.agentLocal / result.exchangeRate).toFixed(2)})</td>
-                <td>${formatCurrency(result.coupon, site.code)} (¥ ${(result.coupon / result.exchangeRate).toFixed(2)})</td>
-                <td>${formatCurrency(result.goodsLocal, site.code)} (¥ ${(result.goodsLocal / result.exchangeRate).toFixed(2)})</td>
-                <td>${formatCurrency(result.influencerCommission, site.code)} (¥ ${(result.influencerCommission / result.exchangeRate).toFixed(2)})</td>
+                <td><div style="font-size: 0.85rem;">${formatCurrency(result.platformFee, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.platformFee / result.exchangeRate).toFixed(2)}</div></td>
+                <td><div style="font-size: 0.85rem;">${formatCurrency(result.customsDuty, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.customsDuty / result.exchangeRate).toFixed(2)}</div></td>
+                <td><div style="font-size: 0.85rem;">${formatCurrency(result.shippingLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.shippingLocal / result.exchangeRate).toFixed(2)}</div></td>
+                <td><div style="font-size: 0.85rem;">${formatCurrency(result.agentLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.agentLocal / result.exchangeRate).toFixed(2)}</div></td>
+                <td><div style="font-size: 0.85rem;">${formatCurrency(result.coupon, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.coupon / result.exchangeRate).toFixed(2)}</div></td>
+                <td><div style="font-size: 0.85rem;">${formatCurrency(result.goodsLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.goodsLocal / result.exchangeRate).toFixed(2)}</div></td>
+                <td><div style="font-size: 0.85rem;">${formatCurrency(result.influencerCommission, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.influencerCommission / result.exchangeRate).toFixed(2)}</div></td>
                 <td style="font-weight: bold; color: ${result.profitLocal >= 0 ? '#00b42a' : '#fe2c55'};">${formatCurrency(result.profitLocal, site.code)}</td>
                 <td style="font-weight: bold; color: ${result.profitCNY >= 0 ? '#00b42a' : '#fe2c55'};">¥ ${result.profitCNY.toFixed(2)}</td>
             `;
