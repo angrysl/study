@@ -46,6 +46,9 @@
         SGD: 1/5.45
     };
 
+    // 历史汇率数据 (用于计算涨跌幅)
+    let historicalRates = {};
+    
     // 当前选中的站点code
     let currentSite = "VND";
 
@@ -55,6 +58,99 @@
     let shippingRates = JSON.parse(JSON.stringify(defaultShipping));
 
     // ---------- 辅助函数 ----------
+    
+    // 检查是否需要更新汇率（每天更新一次）
+    function shouldUpdateRates() {
+        const lastUpdate = localStorage.getItem('exchangeRatesLastUpdate');
+        const today = new Date().toDateString();
+        if (!lastUpdate || lastUpdate !== today) {
+            return true;
+        }
+        return false;
+    }
+
+    // 获取实时汇率
+    async function fetchExchangeRates() {
+        try {
+            // 使用Frankfurter API获取汇率（CNY为基准）
+            const response = await fetch('https://api.frankfurter.app/latest?from=CNY&to=VND,THB,MYR,PHP,SGD');
+            const data = await response.json();
+            
+            if (data.rates) {
+                return data.rates;
+            }
+        } catch (error) {
+            console.error('Failed to fetch exchange rates:', error);
+        }
+        return null;
+    }
+
+    // 获取历史汇率（用于计算涨跌幅）
+    async function fetchHistoricalRates(daysAgo) {
+        try {
+            const date = new Date();
+            date.setDate(date.getDate() - daysAgo);
+            const dateStr = date.toISOString().split('T')[0];
+            const response = await fetch(`https://api.frankfurter.app/${dateStr}?from=CNY&to=VND,THB,MYR,PHP,SGD`);
+            const data = await response.json();
+            if (data.rates) {
+                return data.rates;
+            }
+        } catch (error) {
+            console.error('Failed to fetch historical rates:', error);
+        }
+        return null;
+    }
+
+    // 计算涨跌幅
+    function calculateChangePercent(current, previous) {
+        if (!previous || previous === 0) return 0;
+        return ((current - previous) / previous * 100).toFixed(2);
+    }
+
+    // 更新汇率并保存到本地存储
+    async function updateExchangeRates() {
+        if (!shouldUpdateRates()) {
+            // 使用缓存的汇率
+            const cachedRates = localStorage.getItem('exchangeRates');
+            const cachedHistory = localStorage.getItem('exchangeRatesHistory');
+            if (cachedRates) {
+                exchangeRates = JSON.parse(cachedRates);
+            }
+            if (cachedHistory) {
+                historicalRates = JSON.parse(cachedHistory);
+            }
+            return;
+        }
+
+        // 获取实时汇率
+        const currentRates = await fetchExchangeRates();
+        if (currentRates) {
+            // 更新汇率（转换格式：1CNY = X 当地货币）
+            exchangeRates = {
+                VND: currentRates.VND || 3802,
+                THB: currentRates.THB || 4.7,
+                MYR: currentRates.MYR || 1/1.69,
+                PHP: currentRates.PHP || 8.65,
+                SGD: currentRates.SGD || 1/5.45
+            };
+
+            // 获取历史汇率（1天前和7天前）
+            const history1Day = await fetchHistoricalRates(1);
+            const history7Day = await fetchHistoricalRates(7);
+            
+            historicalRates = {
+                '1day': history1Day || {},
+                '7day': history7Day || {}
+            };
+
+            // 保存到本地存储
+            localStorage.setItem('exchangeRates', JSON.stringify(exchangeRates));
+            localStorage.setItem('exchangeRatesHistory', JSON.stringify(historicalRates));
+            localStorage.setItem('exchangeRatesLastUpdate', new Date().toDateString());
+        }
+    }
+
     function computeTotalFeePercent(siteCode) {
         const fees = subFeeRates[siteCode] || [0,0,0,0,0,0];
         let total = fees.reduce((sum, val) => sum + val, 0);
@@ -251,10 +347,26 @@
         tbody.innerHTML = "";
         for (let site of SITES) {
             let rate = exchangeRates[site.code];
+            // 计算涨跌幅
+            let change1Day = 0;
+            let change7Day = 0;
+            if (historicalRates['1day'] && historicalRates['1day'][site.code]) {
+                change1Day = calculateChangePercent(rate, historicalRates['1day'][site.code]);
+            }
+            if (historicalRates['7day'] && historicalRates['7day'][site.code]) {
+                change7Day = calculateChangePercent(rate, historicalRates['7day'][site.code]);
+            }
+            
+            // 涨跌幅样式
+            let change1DayClass = change1Day > 0 ? 'rate-up' : (change1Day < 0 ? 'rate-down' : 'rate-neutral');
+            let change7DayClass = change7Day > 0 ? 'rate-up' : (change7Day < 0 ? 'rate-down' : 'rate-neutral');
+            
             let tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${site.name}</td>
                 <td><input type="number" step="0.001" class="small-input exchange-input" data-site="${site.code}" value="${rate}"></td>
+                <td class="${change1DayClass}">${change1Day > 0 ? '↑' : change1Day < 0 ? '↓' : '—'} ${Math.abs(change1Day)}%</td>
+                <td class="${change7DayClass}">${change7Day > 0 ? '↑' : change7Day < 0 ? '↓' : '—'} ${Math.abs(change7Day)}%</td>
             `;
             tbody.appendChild(tr);
         }
@@ -319,7 +431,17 @@
     }
 
     // 初始化所有
-    function init() {
+    async function init() {
+        // 先更新汇率（每天一次）
+        await updateExchangeRates();
+        
+        // 更新汇率更新时间显示
+        const lastUpdate = localStorage.getItem('exchangeRatesLastUpdate');
+        const rateUpdateEl = document.getElementById('rateUpdateTime');
+        if (rateUpdateEl && lastUpdate) {
+            rateUpdateEl.textContent = `汇率更新: ${lastUpdate}`;
+        }
+        
         buildFeeTable();
         buildShippingTable();
         buildExchangeTable();
@@ -327,6 +449,24 @@
         bindBasicInputs();
         refreshAll();
         document.getElementById("resetDefaultsBtn").addEventListener("click", resetToDefaults);
+        
+        // 添加手动刷新汇率按钮事件
+        const refreshBtn = document.getElementById('refreshRatesBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async function() {
+                // 清除缓存，强制更新
+                localStorage.removeItem('exchangeRatesLastUpdate');
+                await updateExchangeRates();
+                buildExchangeTable();
+                refreshAll();
+                
+                // 更新显示
+                const newUpdate = localStorage.getItem('exchangeRatesLastUpdate');
+                if (rateUpdateEl && newUpdate) {
+                    rateUpdateEl.textContent = `汇率更新: ${newUpdate}`;
+                }
+            });
+        }
     }
 
     init();
