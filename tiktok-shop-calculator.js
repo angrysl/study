@@ -52,6 +52,15 @@
     // 当前选中的站点code
     let currentSite = "VND";
 
+    // 各站点单独售价 (人民币)
+    let sitePrices = {
+        VND: 90,
+        THB: 90,
+        MYR: 90,
+        PHP: 90,
+        SGD: 90
+    };
+
     // 动态费率存储 (百分比数值数组)
     let subFeeRates = JSON.parse(JSON.stringify(defaultSubFees));
     // 物流存储
@@ -278,24 +287,43 @@
         tbody.innerHTML = "";
 
         SITES.forEach(site => {
-            let result = calculateProfit(site.code, originalPrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
+            // 使用各站点单独的售价，如果没有设置则使用默认售价
+            let sitePrice = sitePrices[site.code] || originalPrice;
+            let result = calculateProfit(site.code, sitePrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
             
             let tr = document.createElement("tr");
             tr.innerHTML = `
                 <td style="font-weight: 600;">${site.name}</td>
+                <td><input type="number" class="site-price-input" data-site="${site.code}" value="${sitePrice}" step="1" style="width: 80px; padding: 4px; text-align: center;"></td>
                 <td>${formatCurrency(result.discountedPrice, site.code)}</td>
                 <td>¥ ${result.discountedPriceCNY.toFixed(2)}</td>
-                <td>${formatCurrency(result.platformFee, site.code)}</td>
-                <td>${formatCurrency(result.customsDuty, site.code)}</td>
-                <td>${formatCurrency(result.shippingLocal, site.code)}</td>
-                <td>${formatCurrency(result.agentLocal, site.code)}</td>
-                <td>${formatCurrency(result.coupon, site.code)}</td>
-                <td>${formatCurrency(result.goodsLocal, site.code)}</td>
-                <td>${formatCurrency(result.influencerCommission, site.code)}</td>
+                <td>${formatCurrency(result.platformFee, site.code)} (¥ ${(result.platformFee / result.exchangeRate).toFixed(2)})</td>
+                <td>${formatCurrency(result.customsDuty, site.code)} (¥ ${(result.customsDuty / result.exchangeRate).toFixed(2)})</td>
+                <td>${formatCurrency(result.shippingLocal, site.code)} (¥ ${(result.shippingLocal / result.exchangeRate).toFixed(2)})</td>
+                <td>${formatCurrency(result.agentLocal, site.code)} (¥ ${(result.agentLocal / result.exchangeRate).toFixed(2)})</td>
+                <td>${formatCurrency(result.coupon, site.code)} (¥ ${(result.coupon / result.exchangeRate).toFixed(2)})</td>
+                <td>${formatCurrency(result.goodsLocal, site.code)} (¥ ${(result.goodsLocal / result.exchangeRate).toFixed(2)})</td>
+                <td>${formatCurrency(result.influencerCommission, site.code)} (¥ ${(result.influencerCommission / result.exchangeRate).toFixed(2)})</td>
                 <td style="font-weight: bold; color: ${result.profitLocal >= 0 ? '#00b42a' : '#fe2c55'};">${formatCurrency(result.profitLocal, site.code)}</td>
                 <td style="font-weight: bold; color: ${result.profitCNY >= 0 ? '#00b42a' : '#fe2c55'};">¥ ${result.profitCNY.toFixed(2)}</td>
             `;
             tbody.appendChild(tr);
+        });
+
+        // 绑定售价输入事件
+        bindSitePriceInputs();
+    }
+
+    // 绑定站点售价输入事件
+    function bindSitePriceInputs() {
+        const inputs = document.querySelectorAll('.site-price-input');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const siteCode = this.dataset.site;
+                const value = parseFloat(this.value) || 0;
+                sitePrices[siteCode] = value;
+                refreshAll();
+            });
         });
     }
 
