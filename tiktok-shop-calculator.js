@@ -230,7 +230,7 @@
     }
 
     // 核心利润计算，返回所有明细对象 (当地货币)
-    function calculateProfit(siteCode, originalPriceCNY, discountVal, weightGram, freightAgentCNY, couponCNY, couponType, goodsCostCNY, influencerCommissionRate) {
+    function calculateProfit(siteCode, originalPriceCNY, discountVal, weightGram, freightAgentCNY, couponCNY, goodsCostCNY, influencerCommissionRate) {
         let exchange = getExchangeRate(siteCode);
         let discountFactor = discountVal / 10;
         // 人民币售价先换算成当地货币，再计算折后价
@@ -256,13 +256,8 @@
         // 4. 货代成本 换算当地货币
         let agentLocal = freightAgentCNY * exchange;
 
-        // 5. 优惠券处理 (人民币输入，支持金额和百分比两种方式)
-        let couponCNYValue = 0;
-        if (couponType === "amount") {
-            couponCNYValue = couponCNY;
-        } else if (couponType === "percent") {
-            couponCNYValue = discountedPriceCNY * (couponCNY / 100);
-        }
+        // 5. 优惠券处理 (人民币金额)
+        let couponCNYValue = couponCNY;
         // 换算成当地货币
         let coupon = couponCNYValue * exchange;
 
@@ -299,7 +294,6 @@
         let weight = parseFloat(document.getElementById("weight").value) || 0;
         let freightAgent = parseFloat(document.getElementById("freightAgent").value) || 0;
         let coupon = parseFloat(document.getElementById("coupon").value) || 0;
-        let couponType = document.getElementById("couponType").value;
         let goodsCost = parseFloat(document.getElementById("goodsCost").value) || 0;
         let influencerCommission = parseFloat(document.getElementById("influencerCommission").value) || 0;
 
@@ -314,7 +308,7 @@
         document.getElementById("influencerCommission").value = influencerCommission;
 
         // 生成表格，显示所有站点的数据
-        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
+        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission);
         
         // 更新表格中的输入框值（如果站点没有单独设置过，则显示基础值）
         updateTableInputs(originalPrice, discount, coupon, influencerCommission);
@@ -356,7 +350,7 @@
     }
 
     // 构建利润表格
-    function buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission) {
+    function buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission) {
         const tbody = document.getElementById("profitTableBody");
         tbody.innerHTML = "";
 
@@ -366,7 +360,7 @@
             let siteDiscount = siteDiscounts[site.code] || discount;
             let siteCoupon = siteCoupons[site.code] || coupon;
             let siteInfluencerCommission = siteInfluencerCommissions[site.code] || influencerCommission;
-            let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, siteCoupon, "amount", goodsCost, siteInfluencerCommission);
+            let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, siteCoupon, goodsCost, siteInfluencerCommission);
             
             let tr = document.createElement("tr");
             tr.innerHTML = `
@@ -612,9 +606,6 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => refreshAll());
         });
-        // 监听优惠券类型选择
-        const couponTypeEl = document.getElementById('couponType');
-        if (couponTypeEl) couponTypeEl.addEventListener('change', () => refreshAll());
     }
 
     // 初始化所有
