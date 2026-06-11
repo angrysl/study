@@ -306,6 +306,32 @@
 
         // 生成表格，显示所有站点的数据
         buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
+        
+        // 更新表格中的输入框值（如果站点没有单独设置过，则显示基础值）
+        updateTableInputs(originalPrice, discount, coupon, influencerCommission);
+    }
+
+    // 更新表格中的输入框值
+    function updateTableInputs(originalPrice, discount, coupon, influencerCommission) {
+        SITES.forEach(site => {
+            // 如果站点没有单独设置，则使用基础值更新输入框
+            if (!sitePrices[site.code]) {
+                const priceInput = document.querySelector(`.site-price-input[data-site="${site.code}"]`);
+                if (priceInput) priceInput.value = originalPrice;
+            }
+            if (!siteDiscounts[site.code]) {
+                const discountInput = document.querySelector(`.site-discount-input[data-site="${site.code}"]`);
+                if (discountInput) discountInput.value = discount;
+            }
+            if (!siteCoupons[site.code]) {
+                const couponInput = document.querySelector(`.site-coupon-input[data-site="${site.code}"]`);
+                if (couponInput) couponInput.value = coupon;
+            }
+            if (!siteInfluencerCommissions[site.code]) {
+                const influencerInput = document.querySelector(`.site-influencer-input[data-site="${site.code}"]`);
+                if (influencerInput) influencerInput.value = influencerCommission;
+            }
+        });
     }
 
     // 构建利润表格
