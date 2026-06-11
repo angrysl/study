@@ -126,12 +126,9 @@
                 </table>
             </div>
             <div style="flex: 1; min-width: 200px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                     <h4>💱 汇率 (1人民币 → 当地货币)</h4>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span class="badge" id="rateUpdateTime">汇率更新: 未更新</span>
-                        <button id="refreshRatesBtn" style="font-size: 0.7rem; padding: 4px 10px;">🔄 刷新</button>
-                    </div>
+                    <button id="refreshRatesBtn" style="font-size: 0.7rem; padding: 4px 10px;">🔄 刷新</button>
                 </div>
                 <table class="config-table" id="exchangeTable">
                     <thead><tr><th>站点</th><th>当前汇率</th><th>1日涨跌</th><th>7日涨跌</th></tr></thead>
