@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Shop 东南亚跨境成本计算器</title>
+    <link rel="stylesheet" href="tiktok-shop-calculator.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌏 TikTok Shop 东南亚跨境成本计算器</h1>
+            <p>支持越南、泰国、马来西亚、菲律宾、新加坡站点 | 实时汇率换算 | 自动计算预估利润</p>
+            <div id="exchangeRateInfo" style="margin-top: 10px; color: #667eea; font-weight: 500;">汇率: 默认值</div>
+        </div>
+
+        <div class="main-content">
+            <!-- 左侧输入区 -->
+            <div class="card">
+                <h2>📝 产品信息输入</h2>
+                
+                <div class="form-group">
+                    <label>选择站点</label>
+                    <select id="site" onchange="calculate()">
+                        <option value="vietnam">越南 (VND)</option>
+                        <option value="thailand">泰国 (THB)</option>
+                        <option value="malaysia">马来西亚 (MYR)</option>
+                        <option value="philippines">菲律宾 (PHP)</option>
+                        <option value="singapore">新加坡 (SGD)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>本地展示价（原价）</label>
+                    <input type="number" id="originalPrice" value="340000" oninput="calculate()">
+                    <div class="unit">当地货币</div>
+                </div>
+
+                <div class="form-group">
+                    <label>折扣范围（1-10）</label>
+                    <input type="number" id="discount" value="5" min="1" max="10" oninput="calculate()">
+                    <div class="unit">7折填7，不打折填10</div>
+                </div>
+
+                <div class="form-group">
+                    <label>商品重量（头程运费）</label>
+                    <input type="number" id="weight" value="400" oninput="calculate()">
+                    <div class="unit">单位：克（1KG=1000g）</div>
+                </div>
+
+                <div class="form-group">
+                    <label>货品成本（人民币）</label>
+                    <input type="number" id="productCost" value="2" oninput="calculate()">
+                    <div class="unit">商品采集价</div>
+                </div>
+
+                <div class="form-group">
+                    <label>其他成本（人民币）</label>
+                    <input type="number" id="otherCost" value="0" oninput="calculate()">
+                    <div class="unit">货代成本等其他费用</div>
+                </div>
+
+                <div class="form-group">
+                    <label>优惠券（当地货币）</label>
+                    <input type="number" id="coupon" value="0" oninput="calculate()">
+                    <div class="unit">官方优惠券或店铺优惠券</div>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 计算公式：</strong><br>
+                    利润 = (原价×折扣) - (原价×折扣×平台费率) - 国际物流成本 - 货代成本 - 优惠券 - 货品成本
+                </div>
+
+                <button class="btn" onclick="calculate()">🔄 重新计算</button>
+                <button class="btn btn-reset" onclick="resetForm()">🔄 重置表单</button>
+            </div>
+
+            <!-- 右侧结果区 -->
+            <div class="card">
+                <h2>📊 计算结果</h2>
+
+                <div class="result-item">
+                    <span class="result-label">折后价（当地货币）</span>
+                    <span class="result-value" id="discountedPrice">—</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">折后价（人民币）</span>
+                    <span class="result-value" id="discountedPriceCNY">—</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">平台费用（当地货币）</span>
+                    <span class="result-value" id="platformFee">—</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">平台费用（人民币）</span>
+                    <span class="result-value" id="platformFeeCNY">—</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">国际物流成本（当地货币）</span>
+                    <span class="result-value" id="shippingCost">—</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">国际物流成本（人民币）</span>
+                    <span class="result-value" id="shippingCostCNY">—</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">总成本（人民币）</span>
+                    <span class="result-value" id="totalCost">—</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">预估利润（人民币）</span>
+                    <span class="result-value highlight" id="profit">—</span>
+                </div>
+
+                <div class="result-item">
+                    <span class="result-label">毛利率</span>
+                    <span class="result-value" id="margin">—</span>
+                </div>
+
+                <div class="shipping-cost">
+                    <h3>📦 各站点物流成本对比（<span id="weightDisplay">400</span>克）</h3>
+                    <div class="shipping-cost-grid">
+                        <div class="shipping-item">
+                            <div class="label">越南</div>
+                            <div class="value" id="shippingVN">—</div>
+                        </div>
+                        <div class="shipping-item">
+                            <div class="label">泰国</div>
+                            <div class="value" id="shippingTH">—</div>
+                        </div>
+                        <div class="shipping-item">
+                            <div class="label">马来</div>
+                            <div class="value" id="shippingMY">—</div>
+                        </div>
+                        <div class="shipping-item">
+                            <div class="label">菲律宾</div>
+                            <div class="value" id="shippingPH">—</div>
+                        </div>
+                        <div class="shipping-item">
+                            <div class="label">新加坡</div>
+                            <div class="value" id="shippingSG">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="refreshExchangeRates()" style="background: #10b981;">🔄 刷新实时汇率</button>
+            </div>
+        </div>
+
+        <!-- 费率表 -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>💰 各站点费率表</h2>
+            <table class="rates-table">
+                <thead>
+                    <tr>
+                        <th>站点</th>
+                        <th>平台佣金</th>
+                        <th>交易手续费</th>
+                        <th>增值税</th>
+                        <th>其他费用</th>
+                        <th>合计费率</th>
+                        <th>汇率（1人民币=）</th>
+                    </tr>
+                </thead>
+                <tbody id="ratesTable">
+                    <!-- 动态生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="tiktok-shop-calculator.js"></script>
+</body>
+</html>
