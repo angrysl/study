@@ -9,8 +9,9 @@
             padding: 20px;
         }
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
+            width: 98%;
         }
         /* 卡片通用样式 */
         .card {
