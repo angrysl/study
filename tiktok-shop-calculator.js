@@ -88,6 +88,15 @@
         SGD: 0
     };
 
+    // 标记哪些站点被手动修改过
+    let siteModified = {
+        VND: { price: false, discount: false, coupon: false, influencer: false },
+        THB: { price: false, discount: false, coupon: false, influencer: false },
+        MYR: { price: false, discount: false, coupon: false, influencer: false },
+        PHP: { price: false, discount: false, coupon: false, influencer: false },
+        SGD: { price: false, discount: false, coupon: false, influencer: false }
+    };
+
     // 动态费率存储 (百分比数值数组)
     let subFeeRates = JSON.parse(JSON.stringify(defaultSubFees));
     // 物流存储
@@ -314,22 +323,34 @@
     // 更新表格中的输入框值
     function updateTableInputs(originalPrice, discount, coupon, influencerCommission) {
         SITES.forEach(site => {
-            // 如果站点没有单独设置，则使用基础值更新输入框
-            if (!sitePrices[site.code]) {
+            // 如果站点没有单独修改过，则使用基础值更新输入框
+            if (!siteModified[site.code].price) {
                 const priceInput = document.querySelector(`.site-price-input[data-site="${site.code}"]`);
-                if (priceInput) priceInput.value = originalPrice;
+                if (priceInput) {
+                    priceInput.value = originalPrice;
+                    sitePrices[site.code] = originalPrice;
+                }
             }
-            if (!siteDiscounts[site.code]) {
+            if (!siteModified[site.code].discount) {
                 const discountInput = document.querySelector(`.site-discount-input[data-site="${site.code}"]`);
-                if (discountInput) discountInput.value = discount;
+                if (discountInput) {
+                    discountInput.value = discount;
+                    siteDiscounts[site.code] = discount;
+                }
             }
-            if (!siteCoupons[site.code]) {
+            if (!siteModified[site.code].coupon) {
                 const couponInput = document.querySelector(`.site-coupon-input[data-site="${site.code}"]`);
-                if (couponInput) couponInput.value = coupon;
+                if (couponInput) {
+                    couponInput.value = coupon;
+                    siteCoupons[site.code] = coupon;
+                }
             }
-            if (!siteInfluencerCommissions[site.code]) {
+            if (!siteModified[site.code].influencer) {
                 const influencerInput = document.querySelector(`.site-influencer-input[data-site="${site.code}"]`);
-                if (influencerInput) influencerInput.value = influencerCommission;
+                if (influencerInput) {
+                    influencerInput.value = influencerCommission;
+                    siteInfluencerCommissions[site.code] = influencerCommission;
+                }
             }
         });
     }
@@ -382,6 +403,7 @@
                 const siteCode = this.dataset.site;
                 const value = parseFloat(this.value) || 0;
                 sitePrices[siteCode] = value;
+                siteModified[siteCode].price = true;  // 标记为已修改
                 refreshAll();
             });
         });
@@ -397,6 +419,7 @@
                 if (value > 10) value = 10;
                 this.value = value;
                 siteDiscounts[siteCode] = value;
+                siteModified[siteCode].discount = true;  // 标记为已修改
                 refreshAll();
             });
         });
@@ -411,6 +434,7 @@
                 if (value < 0) value = 0;
                 this.value = value;
                 siteCoupons[siteCode] = value;
+                siteModified[siteCode].coupon = true;  // 标记为已修改
                 refreshAll();
             });
         });
@@ -426,6 +450,7 @@
                 if (value > 50) value = 50;
                 this.value = value;
                 siteInfluencerCommissions[siteCode] = value;
+                siteModified[siteCode].influencer = true;  // 标记为已修改
                 refreshAll();
             });
         });
