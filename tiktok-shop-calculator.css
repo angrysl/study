@@ -145,6 +145,34 @@
             justify-content: space-between;
             align-items: center;
         }
+        .profit-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .profit-table th {
+            background: #f8fafc;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .profit-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+            color: #5a6e85;
+        }
+        .profit-table tr:hover {
+            background: #f8fafc;
+        }
+        .profit-table tr:last-child td {
+            border-bottom: none;
+        }
         .note {
             background: #f9f9fb;
             border-radius: 12px;

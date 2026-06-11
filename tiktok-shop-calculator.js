@@ -268,21 +268,35 @@
         if (influencerCommission > 50) influencerCommission = 50;
         document.getElementById("influencerCommission").value = influencerCommission;
 
-        // 计算利润 (人民币售价需要先换算成当地货币)
-        let result = calculateProfit(currentSite, originalPrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
-        
-        // 更新界面显示
-        document.getElementById("discountedLocal").innerHTML = formatCurrency(result.discountedPrice, currentSite);
-        document.getElementById("discountedCny").innerHTML = `¥ ${result.discountedPriceCNY.toFixed(2)}`;
-        document.getElementById("platformFee").innerHTML = formatCurrency(result.platformFee, currentSite);
-        document.getElementById("customsDuty").innerHTML = formatCurrency(result.customsDuty, currentSite);
-        document.getElementById("shippingCost").innerHTML = formatCurrency(result.shippingLocal, currentSite);
-        document.getElementById("agentCostLocal").innerHTML = formatCurrency(result.agentLocal, currentSite);
-        document.getElementById("couponShow").innerHTML = formatCurrency(result.coupon, currentSite);
-        document.getElementById("goodsCostLocal").innerHTML = formatCurrency(result.goodsLocal, currentSite);
-        document.getElementById("influencerCommissionShow").innerHTML = formatCurrency(result.influencerCommission, currentSite);
-        document.getElementById("profitLocal").innerHTML = formatCurrency(result.profitLocal, currentSite);
-        document.getElementById("profitCny").innerHTML = `¥ ${result.profitCNY.toFixed(2)}`;
+        // 生成表格，显示所有站点的数据
+        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
+    }
+
+    // 构建利润表格
+    function buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission) {
+        const tbody = document.getElementById("profitTableBody");
+        tbody.innerHTML = "";
+
+        SITES.forEach(site => {
+            let result = calculateProfit(site.code, originalPrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
+            
+            let tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td style="font-weight: 600;">${site.name}</td>
+                <td>${formatCurrency(result.discountedPrice, site.code)}</td>
+                <td>¥ ${result.discountedPriceCNY.toFixed(2)}</td>
+                <td>${formatCurrency(result.platformFee, site.code)}</td>
+                <td>${formatCurrency(result.customsDuty, site.code)}</td>
+                <td>${formatCurrency(result.shippingLocal, site.code)}</td>
+                <td>${formatCurrency(result.agentLocal, site.code)}</td>
+                <td>${formatCurrency(result.coupon, site.code)}</td>
+                <td>${formatCurrency(result.goodsLocal, site.code)}</td>
+                <td>${formatCurrency(result.influencerCommission, site.code)}</td>
+                <td style="font-weight: bold; color: ${result.profitLocal >= 0 ? '#00b42a' : '#fe2c55'};">${formatCurrency(result.profitLocal, site.code)}</td>
+                <td style="font-weight: bold; color: ${result.profitCNY >= 0 ? '#00b42a' : '#fe2c55'};">¥ ${result.profitCNY.toFixed(2)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
     function formatCurrency(value, siteCode) {

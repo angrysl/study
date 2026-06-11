@@ -70,26 +70,33 @@
         <div class="card">
             <div class="card-title">💰 预估利润明细</div>
             <div id="resultArea">
-                <!-- 动态填充 -->
-                <div class="profit-panel">
-                    <div class="flex-between"><span>📌 折后价 (当地货币)</span><strong id="discountedLocal">0</strong></div>
-                    <div class="flex-between"><span>📌 折后价 (人民币)</span><span id="discountedCny">0</span></div>
-                    <hr>
-                    <div class="detail-row"><span>🔻 平台费 (含佣金/交易税等)</span><span id="platformFee">0</span></div>
-                    <div class="detail-row"><span>🛃 关税 (仅泰国生效)</span><span id="customsDuty">0</span></div>
-                    <div class="detail-row"><span>✈️ 国际物流成本 (头程)</span><span id="shippingCost">0</span></div>
-                    <div class="detail-row"><span>📦 货代成本(换算后)</span><span id="agentCostLocal">0</span></div>
-                    <div class="detail-row"><span>🎫 优惠券抵扣</span><span id="couponShow">0</span></div>
-                    <div class="detail-row"><span>🏭 货品成本(换算后)</span><span id="goodsCostLocal">0</span></div>
-                    <div class="detail-row"><span>👤 达人佣金</span><span id="influencerCommissionShow">0</span></div>
-                    <div class="total-profit">
-                        <div class="flex-between" style="font-weight:bold; font-size:1rem;">✅ 预估净利润 (当地货币) <span id="profitLocal">0</span></div>
-                        <div class="flex-between" style="margin-top:8px;">✅ 预估净利润 (人民币) <span id="profitCny">0</span></div>
-                    </div>
+                <!-- 动态填充表格 -->
+                <div style="overflow-x: auto;">
+                    <table class="profit-table" id="profitTable">
+                        <thead>
+                            <tr>
+                                <th>站点</th>
+                                <th>折后价(当地)</th>
+                                <th>折后价(人民币)</th>
+                                <th>平台费</th>
+                                <th>关税</th>
+                                <th>物流成本</th>
+                                <th>货代成本</th>
+                                <th>优惠券</th>
+                                <th>货品成本</th>
+                                <th>达人佣金</th>
+                                <th>净利润(当地)</th>
+                                <th>净利润(人民币)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profitTableBody">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="note" style="margin-top: 12px;">
-                ⚡ 切换站点自动更新费率、汇率、物流价卡。下方配置表可自由修改所有参数，结果实时重算。
+                ⚡ 所有站点的利润明细实时计算，下方配置表可自由修改所有参数，结果实时重算。
             </div>
         </div>
     </div>
