@@ -185,7 +185,7 @@
     }
 
     // 核心利润计算，返回所有明细对象 (当地货币)
-    function calculateProfit(siteCode, originalPriceCNY, discountVal, weightGram, freightAgentCNY, couponLocal, goodsCostCNY) {
+    function calculateProfit(siteCode, originalPriceCNY, discountVal, weightGram, freightAgentCNY, couponLocal, goodsCostCNY, influencerCommissionRate) {
         let exchange = getExchangeRate(siteCode);
         let discountFactor = discountVal / 10;
         // 人民币售价先换算成当地货币，再计算折后价
@@ -216,7 +216,10 @@
         // 6. 货品成本换算当地货币
         let goodsLocal = goodsCostCNY * exchange;
 
-        let profitLocal = discountedPrice - platformFee - customsDuty - shippingLocal - agentLocal - coupon - goodsLocal;
+        // 7. 达人佣金 (折后价 × 达人佣金率)
+        let influencerCommission = discountedPrice * (influencerCommissionRate / 100);
+
+        let profitLocal = discountedPrice - platformFee - customsDuty - shippingLocal - agentLocal - coupon - goodsLocal - influencerCommission;
         let profitCNY = profitLocal / exchange;
 
         return {
@@ -227,6 +230,7 @@
             agentLocal,
             coupon,
             goodsLocal,
+            influencerCommission,
             profitLocal,
             profitCNY,
             exchangeRate: exchange,
@@ -243,14 +247,20 @@
         let freightAgent = parseFloat(document.getElementById("freightAgent").value) || 0;
         let coupon = parseFloat(document.getElementById("coupon").value) || 0;
         let goodsCost = parseFloat(document.getElementById("goodsCost").value) || 0;
+        let influencerCommission = parseFloat(document.getElementById("influencerCommission").value) || 0;
 
         // 折扣范围限制1-10
         if (discount < 1) discount = 1;
         if (discount > 10) discount = 10;
         document.getElementById("discount").value = discount;
 
+        // 达人佣金率范围限制0-50
+        if (influencerCommission < 0) influencerCommission = 0;
+        if (influencerCommission > 50) influencerCommission = 50;
+        document.getElementById("influencerCommission").value = influencerCommission;
+
         // 计算利润 (人民币售价需要先换算成当地货币)
-        let result = calculateProfit(currentSite, originalPrice, discount, weight, freightAgent, coupon, goodsCost);
+        let result = calculateProfit(currentSite, originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission);
         
         // 更新界面显示
         document.getElementById("discountedLocal").innerHTML = formatCurrency(result.discountedPrice, currentSite);
@@ -261,6 +271,7 @@
         document.getElementById("agentCostLocal").innerHTML = formatCurrency(result.agentLocal, currentSite);
         document.getElementById("couponShow").innerHTML = formatCurrency(result.coupon, currentSite);
         document.getElementById("goodsCostLocal").innerHTML = formatCurrency(result.goodsLocal, currentSite);
+        document.getElementById("influencerCommissionShow").innerHTML = formatCurrency(result.influencerCommission, currentSite);
         document.getElementById("profitLocal").innerHTML = formatCurrency(result.profitLocal, currentSite);
         document.getElementById("profitCny").innerHTML = `¥ ${result.profitCNY.toFixed(2)}`;
     }
@@ -416,7 +427,7 @@
 
     // 监听基础输入
     function bindBasicInputs() {
-        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost'];
+        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost', 'influencerCommission'];
         inputs.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => refreshAll());
