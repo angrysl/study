@@ -191,3 +191,19 @@
         .rate-neutral {
             color: #6b7280;
         }
+        /* 三列表单布局 */
+        .form-group-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+        @media (max-width: 900px) {
+            .form-group-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .form-group-grid {
+                grid-template-columns: 1fr;
+            }
+        }

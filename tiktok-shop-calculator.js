@@ -185,9 +185,11 @@
     }
 
     // 核心利润计算，返回所有明细对象 (当地货币)
-    function calculateProfit(siteCode, originalPriceLocal, discountVal, weightGram, freightAgentCNY, couponLocal, goodsCostCNY) {
+    function calculateProfit(siteCode, originalPriceCNY, discountVal, weightGram, freightAgentCNY, couponLocal, goodsCostCNY) {
         let exchange = getExchangeRate(siteCode);
         let discountFactor = discountVal / 10;
+        // 人民币售价先换算成当地货币，再计算折后价
+        let originalPriceLocal = originalPriceCNY * exchange;
         let discountedPrice = originalPriceLocal * discountFactor;   // 折后价(本地)
 
         // 1. 平台费
@@ -235,8 +237,6 @@
     // 刷新界面所有显示: 从表单取值，计算并渲染结果 + 更新费率表显示等
     function refreshAll() {
         // 读取表单
-        let siteSelect = document.getElementById("siteSelect");
-        currentSite = siteSelect.value;
         let originalPrice = parseFloat(document.getElementById("originalPrice").value) || 0;
         let discount = parseFloat(document.getElementById("discount").value) || 10;
         let weight = parseFloat(document.getElementById("weight").value) || 0;
@@ -249,7 +249,7 @@
         if (discount > 10) discount = 10;
         document.getElementById("discount").value = discount;
 
-        // 计算利润
+        // 计算利润 (人民币售价需要先换算成当地货币)
         let result = calculateProfit(currentSite, originalPrice, discount, weight, freightAgent, coupon, goodsCost);
         
         // 更新界面显示
@@ -263,13 +263,6 @@
         document.getElementById("goodsCostLocal").innerHTML = formatCurrency(result.goodsLocal, currentSite);
         document.getElementById("profitLocal").innerHTML = formatCurrency(result.profitLocal, currentSite);
         document.getElementById("profitCny").innerHTML = `¥ ${result.profitCNY.toFixed(2)}`;
-        
-        // 更新货币单位提示
-        let siteObj = SITES.find(s => s.code === currentSite);
-        if (siteObj) {
-            document.getElementById("currencyHint").innerHTML = `(${siteObj.currency} 当地货币)`;
-            document.getElementById("couponHint").innerHTML = `(${siteObj.currency})`;
-        }
     }
 
     function formatCurrency(value, siteCode) {
@@ -423,14 +416,10 @@
 
     // 监听基础输入
     function bindBasicInputs() {
-        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost', 'siteSelect'];
+        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost'];
         inputs.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => refreshAll());
-            if (el && el.tagName === 'SELECT') el.addEventListener('change', () => {
-                // 切换站点时更新货币相关提示
-                refreshAll();
-            });
         });
     }
 
