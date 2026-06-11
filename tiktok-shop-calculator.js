@@ -321,11 +321,14 @@
         tbody.innerHTML = "";
         for (let site of SITES) {
             let cfg = shippingRates[site.code] || { firstGram: 10, firstPrice: 0, additionalPer10g: 0 };
+            // 计算首重费用换算成人民币
+            let firstPriceCNY = cfg.firstPrice / exchangeRates[site.code];
             let tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${site.name}</td>
                 <td><input type="number" step="1" class="small-input shipping-gram" data-site="${site.code}" data-field="firstGram" value="${cfg.firstGram}"></td>
                 <td><input type="number" step="0.01" class="small-input shipping-first" data-site="${site.code}" data-field="firstPrice" value="${cfg.firstPrice}"></td>
+                <td style="background:#f1f5f9; font-weight:500;">¥ ${firstPriceCNY.toFixed(2)}</td>
                 <td><input type="number" step="0.01" class="small-input shipping-add" data-site="${site.code}" data-field="additionalPer10g" value="${cfg.additionalPer10g}"></td>
             `;
             tbody.appendChild(tr);
@@ -337,6 +340,7 @@
                 let val = parseFloat(this.value) || 0;
                 if (!shippingRates[siteCode]) shippingRates[siteCode] = { firstGram: 10, firstPrice: 0, additionalPer10g: 0 };
                 shippingRates[siteCode][field] = val;
+                buildShippingTable();  // 刷新表格以更新人民币金额
                 refreshAll();
             });
         });
