@@ -153,6 +153,17 @@
             color: #5b6e8c;
             margin-top: 12px;
         }
+        .note-highlight {
+            background: #fff5f5;
+            border: 2px solid #fe2c55;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 0.95rem;
+            color: #fe2c55;
+            font-weight: 600;
+            margin-top: 12px;
+            line-height: 1.6;
+        }
         @media (max-width: 800px) {
             .grid-2col {
                 grid-template-columns: 1fr;
