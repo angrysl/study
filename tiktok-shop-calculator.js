@@ -61,6 +61,15 @@
         SGD: 90
     };
 
+    // 各站点单独折扣范围
+    let siteDiscounts = {
+        VND: 5,
+        THB: 5,
+        MYR: 5,
+        PHP: 5,
+        SGD: 5
+    };
+
     // 动态费率存储 (百分比数值数组)
     let subFeeRates = JSON.parse(JSON.stringify(defaultSubFees));
     // 物流存储
@@ -287,14 +296,16 @@
         tbody.innerHTML = "";
 
         SITES.forEach(site => {
-            // 使用各站点单独的售价，如果没有设置则使用默认售价
+            // 使用各站点单独的售价和折扣，如果没有设置则使用默认值
             let sitePrice = sitePrices[site.code] || originalPrice;
-            let result = calculateProfit(site.code, sitePrice, discount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
+            let siteDiscount = siteDiscounts[site.code] || discount;
+            let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
             
             let tr = document.createElement("tr");
             tr.innerHTML = `
                 <td style="font-weight: 600;">${site.name}</td>
                 <td><input type="number" class="site-price-input" data-site="${site.code}" value="${sitePrice}" step="1" style="width: 80px; padding: 4px; text-align: center;"></td>
+                <td><input type="number" class="site-discount-input" data-site="${site.code}" value="${siteDiscount}" min="1" max="10" step="1" style="width: 60px; padding: 4px; text-align: center;"></td>
                 <td>${formatCurrency(result.discountedPrice, site.code)}</td>
                 <td>¥ ${result.discountedPriceCNY.toFixed(2)}</td>
                 <td><div style="font-size: 0.85rem;">${formatCurrency(result.platformFee, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.platformFee / result.exchangeRate).toFixed(2)}</div></td>
@@ -310,18 +321,34 @@
             tbody.appendChild(tr);
         });
 
-        // 绑定售价输入事件
-        bindSitePriceInputs();
+        // 绑定售价和折扣输入事件
+        bindSiteInputs();
     }
 
-    // 绑定站点售价输入事件
-    function bindSitePriceInputs() {
-        const inputs = document.querySelectorAll('.site-price-input');
-        inputs.forEach(input => {
+    // 绑定站点售价和折扣输入事件
+    function bindSiteInputs() {
+        // 绑定售价输入
+        const priceInputs = document.querySelectorAll('.site-price-input');
+        priceInputs.forEach(input => {
             input.addEventListener('change', function() {
                 const siteCode = this.dataset.site;
                 const value = parseFloat(this.value) || 0;
                 sitePrices[siteCode] = value;
+                refreshAll();
+            });
+        });
+        
+        // 绑定折扣输入
+        const discountInputs = document.querySelectorAll('.site-discount-input');
+        discountInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const siteCode = this.dataset.site;
+                let value = parseFloat(this.value) || 1;
+                // 限制范围1-10
+                if (value < 1) value = 1;
+                if (value > 10) value = 10;
+                this.value = value;
+                siteDiscounts[siteCode] = value;
                 refreshAll();
             });
         });
