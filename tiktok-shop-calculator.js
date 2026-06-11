@@ -70,6 +70,24 @@
         SGD: 5
     };
 
+    // 各站点单独优惠券 (人民币)
+    let siteCoupons = {
+        VND: 0,
+        THB: 0,
+        MYR: 0,
+        PHP: 0,
+        SGD: 0
+    };
+
+    // 各站点单独达人佣金率 (%)
+    let siteInfluencerCommissions = {
+        VND: 0,
+        THB: 0,
+        MYR: 0,
+        PHP: 0,
+        SGD: 0
+    };
+
     // 动态费率存储 (百分比数值数组)
     let subFeeRates = JSON.parse(JSON.stringify(defaultSubFees));
     // 物流存储
@@ -296,16 +314,20 @@
         tbody.innerHTML = "";
 
         SITES.forEach(site => {
-            // 使用各站点单独的售价和折扣，如果没有设置则使用默认值
+            // 使用各站点单独的售价、折扣、优惠券和达人佣金率
             let sitePrice = sitePrices[site.code] || originalPrice;
             let siteDiscount = siteDiscounts[site.code] || discount;
-            let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, coupon, couponType, goodsCost, influencerCommission);
+            let siteCoupon = siteCoupons[site.code] || coupon;
+            let siteInfluencerCommission = siteInfluencerCommissions[site.code] || influencerCommission;
+            let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, siteCoupon, "amount", goodsCost, siteInfluencerCommission);
             
             let tr = document.createElement("tr");
             tr.innerHTML = `
                 <td style="font-weight: 600;">${site.name}</td>
                 <td><input type="number" class="site-price-input" data-site="${site.code}" value="${sitePrice}" step="1" style="width: 80px; padding: 4px; text-align: center;"></td>
                 <td><input type="number" class="site-discount-input" data-site="${site.code}" value="${siteDiscount}" min="1" max="10" step="1" style="width: 60px; padding: 4px; text-align: center;"></td>
+                <td><input type="number" class="site-coupon-input" data-site="${site.code}" value="${siteCoupon}" step="0.5" style="width: 70px; padding: 4px; text-align: center;"></td>
+                <td><input type="number" class="site-influencer-input" data-site="${site.code}" value="${siteInfluencerCommission}" min="0" max="50" step="0.5" style="width: 70px; padding: 4px; text-align: center;"></td>
                 <td>${formatCurrency(result.discountedPrice, site.code)}</td>
                 <td>¥ ${result.discountedPriceCNY.toFixed(2)}</td>
                 <td><div style="font-size: 0.85rem;">${formatCurrency(result.platformFee, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.platformFee / result.exchangeRate).toFixed(2)}</div></td>
@@ -321,7 +343,7 @@
             tbody.appendChild(tr);
         });
 
-        // 绑定售价和折扣输入事件
+        // 绑定输入事件
         bindSiteInputs();
     }
 
@@ -349,6 +371,35 @@
                 if (value > 10) value = 10;
                 this.value = value;
                 siteDiscounts[siteCode] = value;
+                refreshAll();
+            });
+        });
+        
+        // 绑定优惠券输入
+        const couponInputs = document.querySelectorAll('.site-coupon-input');
+        couponInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const siteCode = this.dataset.site;
+                let value = parseFloat(this.value) || 0;
+                // 限制非负
+                if (value < 0) value = 0;
+                this.value = value;
+                siteCoupons[siteCode] = value;
+                refreshAll();
+            });
+        });
+        
+        // 绑定达人佣金率输入
+        const influencerInputs = document.querySelectorAll('.site-influencer-input');
+        influencerInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const siteCode = this.dataset.site;
+                let value = parseFloat(this.value) || 0;
+                // 限制范围0-50
+                if (value < 0) value = 0;
+                if (value > 50) value = 50;
+                this.value = value;
+                siteInfluencerCommissions[siteCode] = value;
                 refreshAll();
             });
         });
