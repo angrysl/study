@@ -519,6 +519,7 @@
                 refreshAll();
                 
                 // 更新显示
+                const rateUpdateEl = document.getElementById('rateUpdateTime');
                 const newUpdate = localStorage.getItem('exchangeRatesLastUpdate');
                 if (rateUpdateEl && newUpdate) {
                     rateUpdateEl.textContent = `汇率更新: ${newUpdate}`;
