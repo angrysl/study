@@ -518,14 +518,54 @@
                 buildExchangeTable();
                 refreshAll();
                 
-                // 更新显示
-                const rateUpdateEl = document.getElementById('rateUpdateTime');
-                const newUpdate = localStorage.getItem('exchangeRatesLastUpdate');
-                if (rateUpdateEl && newUpdate) {
-                    rateUpdateEl.textContent = `汇率更新: ${newUpdate}`;
-                }
+                // 显示更新完成弹窗
+                showToast('✅ 汇率更新完成！');
             });
         }
+    }
+
+    // 显示提示弹窗
+    function showToast(message) {
+        // 创建弹窗元素
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 24px 32px;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2c3e50;
+            z-index: 1000;
+            text-align: center;
+        `;
+        toast.textContent = message;
+        
+        // 添加遮罩
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+        `;
+        
+        // 添加到页面
+        document.body.appendChild(overlay);
+        document.body.appendChild(toast);
+        
+        // 3秒后移除
+        setTimeout(() => {
+            document.body.removeChild(toast);
+            document.body.removeChild(overlay);
+        }, 2000);
     }
 
     init();
