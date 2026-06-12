@@ -213,6 +213,24 @@
         return rate / 100;
     }
 
+    // 获取合计费率(百分比)
+    function getTotalFeeRate(siteCode) {
+        return computeTotalFeePercent(siteCode) / 100;
+    }
+
+    // 获取关税税率(百分比)
+    function getTariffRate(siteCode) {
+        let rate = tariffRates[siteCode] || 0;
+        return rate / 100;
+    }
+
+    // 获取首重克数
+    function getFirstWeight(siteCode) {
+        let cfg = shippingRates[siteCode];
+        if (!cfg) return 0;
+        return cfg.firstGram || 0;
+    }
+
     // 计算国际物流成本 (当地货币)
     function calcShippingCost(siteCode, weightGram) {
         let cfg = shippingRates[siteCode];
@@ -365,21 +383,21 @@
             let tr = document.createElement("tr");
             tr.innerHTML = `
                 <td style="font-weight: 600;">${site.name}</td>
-                <td><input type="number" class="site-price-input" data-site="${site.code}" value="${sitePrice}" step="1" style="width: 80px; padding: 4px; text-align: center;"></td>
-                <td><input type="number" class="site-discount-input" data-site="${site.code}" value="${siteDiscount}" min="1" max="10" step="1" style="width: 60px; padding: 4px; text-align: center;"></td>
-                <td><input type="number" class="site-coupon-input" data-site="${site.code}" value="${siteCoupon}" step="0.5" style="width: 70px; padding: 4px; text-align: center;"></td>
-                <td><input type="number" class="site-influencer-input" data-site="${site.code}" value="${siteInfluencerCommission}" min="0" max="50" step="0.5" style="width: 70px; padding: 4px; text-align: center;"></td>
-                <td>${formatCurrency(result.discountedPrice, site.code)}</td>
-                <td>¥ ${result.discountedPriceCNY.toFixed(2)}</td>
-                <td><div style="font-size: 0.85rem;">${formatCurrency(result.platformFee, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.platformFee / result.exchangeRate).toFixed(2)}</div></td>
-                <td><div style="font-size: 0.85rem;">${formatCurrency(result.customsDuty, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.customsDuty / result.exchangeRate).toFixed(2)}</div></td>
-                <td><div style="font-size: 0.85rem;">${formatCurrency(result.shippingLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.shippingLocal / result.exchangeRate).toFixed(2)}</div></td>
-                <td><div style="font-size: 0.85rem;">${formatCurrency(result.agentLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.agentLocal / result.exchangeRate).toFixed(2)}</div></td>
-                <td><div style="font-size: 0.85rem;">${formatCurrency(result.coupon, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.coupon / result.exchangeRate).toFixed(2)}</div></td>
-                <td><div style="font-size: 0.85rem;">${formatCurrency(result.goodsLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.goodsLocal / result.exchangeRate).toFixed(2)}</div></td>
-                <td><div style="font-size: 0.85rem;">${formatCurrency(result.influencerCommission, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.influencerCommission / result.exchangeRate).toFixed(2)}</div></td>
-                <td style="font-weight: bold; color: ${result.profitLocal >= 0 ? '#00b42a' : '#fe2c55'};">${formatCurrency(result.profitLocal, site.code)}</td>
-                <td style="font-weight: bold; color: ${result.profitCNY >= 0 ? '#00b42a' : '#fe2c55'};">¥ ${result.profitCNY.toFixed(2)}</td>
+                <td><input type="number" class="site-price-input" data-site="${site.code}" value="${sitePrice}" step="1" style="width: 80px; padding: 4px; text-align: center;" title="基础售价"></td>
+                <td><input type="number" class="site-discount-input" data-site="${site.code}" value="${siteDiscount}" min="1" max="10" step="1" style="width: 60px; padding: 4px; text-align: center;" title="1=1折,10=不打折"></td>
+                <td><input type="number" class="site-coupon-input" data-site="${site.code}" value="${siteCoupon}" step="0.5" style="width: 70px; padding: 4px; text-align: center;" title="优惠券金额(人民币)"></td>
+                <td><input type="number" class="site-influencer-input" data-site="${site.code}" value="${siteInfluencerCommission}" min="0" max="50" step="0.5" style="width: 70px; padding: 4px; text-align: center;" title="达人佣金率(%)"></td>
+                <td title="售价${sitePrice} × ${(siteDiscount/10).toFixed(2)}折扣 × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.discountedPrice, site.code)}">${formatCurrency(result.discountedPrice, site.code)}</td>
+                <td title="折后价${formatCurrency(result.discountedPrice, site.code)} ÷ ${result.exchangeRate.toFixed(4)}汇率 = ¥${result.discountedPriceCNY.toFixed(2)}">¥ ${result.discountedPriceCNY.toFixed(2)}</td>
+                <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × 合计费率${(getTotalFeeRate(site.code)*100).toFixed(2)}% = ${formatCurrency(result.platformFee, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.platformFee, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.platformFee / result.exchangeRate).toFixed(2)}</div></td>
+                <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × 关税${(getTariffRate(site.code)*100).toFixed(2)}% = ${formatCurrency(result.customsDuty, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.customsDuty, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.customsDuty / result.exchangeRate).toFixed(2)}</div></td>
+                <td title="首重费用 + (重量${weight}g - 首重${getFirstWeight(site.code)}g) × 续重费率 = ${formatCurrency(result.shippingLocal, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.shippingLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.shippingLocal / result.exchangeRate).toFixed(2)}</div></td>
+                <td title="货代成本¥${freightAgent} × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.agentLocal, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.agentLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.agentLocal / result.exchangeRate).toFixed(2)}</div></td>
+                <td title="优惠券¥${siteCoupon} × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.coupon, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.coupon, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.coupon / result.exchangeRate).toFixed(2)}</div></td>
+                <td title="货品成本¥${goodsCost} × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.goodsLocal, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.goodsLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.goodsLocal / result.exchangeRate).toFixed(2)}</div></td>
+                <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × ${siteInfluencerCommission}%达人佣金 = ${formatCurrency(result.influencerCommission, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.influencerCommission, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.influencerCommission / result.exchangeRate).toFixed(2)}</div></td>
+                <td style="font-weight: bold; color: ${result.profitLocal >= 0 ? '#00b42a' : '#fe2c55'};" title="折后价${formatCurrency(result.discountedPrice, site.code)} - 平台费${formatCurrency(result.platformFee, site.code)} - 关税${formatCurrency(result.customsDuty, site.code)} - 物流${formatCurrency(result.shippingLocal, site.code)} - 货代${formatCurrency(result.agentLocal, site.code)} - 优惠券${formatCurrency(result.coupon, site.code)} - 货品${formatCurrency(result.goodsLocal, site.code)} - 达人佣金${formatCurrency(result.influencerCommission, site.code)} = ${formatCurrency(result.profitLocal, site.code)}">${formatCurrency(result.profitLocal, site.code)}</td>
+                <td style="font-weight: bold; color: ${result.profitCNY >= 0 ? '#00b42a' : '#fe2c55'};" title="净利润${formatCurrency(result.profitLocal, site.code)} ÷ ${result.exchangeRate.toFixed(4)}汇率 = ¥${result.profitCNY.toFixed(2)}">¥ ${result.profitCNY.toFixed(2)}</td>
             `;
             tbody.appendChild(tr);
         });

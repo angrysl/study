@@ -247,3 +247,14 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* 表格单元格悬浮提示样式 */
+        #profitTable td[title],
+        #profitTable th[title] {
+            cursor: help;
+            position: relative;
+        }
+        #profitTable td[title]:hover,
+        #profitTable th[title]:hover {
+            background-color: #fff3f5;
+        }
+
