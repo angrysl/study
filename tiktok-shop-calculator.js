@@ -381,9 +381,12 @@
             let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, siteCoupon, goodsCost, siteInfluencerCommission);
             
             let tr = document.createElement("tr");
+            // 计算当地售价（人民币售价 × 汇率）
+            let localPrice = sitePrice * result.exchangeRate;
             tr.innerHTML = `
                 <td style="font-weight: 600;">${site.name}</td>
                 <td><input type="number" class="site-price-input" data-site="${site.code}" value="${sitePrice}" step="1" style="width: 80px; padding: 4px; text-align: center;" title="基础售价"></td>
+                <td title="售价¥${sitePrice} × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(localPrice, site.code)}">${formatCurrency(localPrice, site.code)}</td>
                 <td><input type="number" class="site-discount-input" data-site="${site.code}" value="${siteDiscount}" min="1" max="10" step="1" style="width: 60px; padding: 4px; text-align: center;" title="1=1折,10=不打折"></td>
                 <td><input type="number" class="site-coupon-input" data-site="${site.code}" value="${siteCoupon}" step="0.5" style="width: 70px; padding: 4px; text-align: center;" title="优惠券金额(人民币)"></td>
                 <td><input type="number" class="site-influencer-input" data-site="${site.code}" value="${siteInfluencerCommission}" min="0" max="50" step="0.5" style="width: 70px; padding: 4px; text-align: center;" title="达人佣金率(%)"></td>
