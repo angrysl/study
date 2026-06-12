@@ -663,6 +663,65 @@
                 showToast('✅ 汇率更新完成！');
             });
         }
+        
+        // 添加导出表格按钮事件
+        const exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', exportTableToClipboard);
+        }
+    }
+
+    // 导出表格到剪贴板
+    function exportTableToClipboard() {
+        const table = document.getElementById('profitTable');
+        if (!table) {
+            showToast('❌ 未找到表格数据');
+            return;
+        }
+
+        // 构建表格文本（制表符分隔，适合Excel）
+        let tableText = '';
+        
+        // 获取表头
+        const headers = table.querySelectorAll('thead th');
+        const headerTexts = [];
+        headers.forEach(header => {
+            headerTexts.push(header.textContent.trim());
+        });
+        tableText += headerTexts.join('\t') + '\n';
+        
+        // 获取数据行
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const cellTexts = [];
+            cells.forEach(cell => {
+                // 检查是否有输入框
+                const input = cell.querySelector('input');
+                if (input) {
+                    cellTexts.push(input.value);
+                } else {
+                    // 处理多行文本（如人民币价格）
+                    const divs = cell.querySelectorAll('div');
+                    if (divs.length > 0) {
+                        const texts = [];
+                        divs.forEach(div => texts.push(div.textContent.trim()));
+                        cellTexts.push(texts.join(' '));
+                    } else {
+                        cellTexts.push(cell.textContent.trim());
+                    }
+                }
+            });
+            tableText += cellTexts.join('\t') + '\n';
+        });
+
+        // 复制到剪贴板
+        navigator.clipboard.writeText(tableText).then(() => {
+            showToast('✅ 表格已复制到剪贴板！可直接粘贴到Excel');
+        }).catch(err => {
+            console.error('复制失败:', err);
+            showToast('❌ 复制失败，请重试');
+        });
     }
 
     // 显示提示弹窗

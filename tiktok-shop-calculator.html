@@ -62,7 +62,12 @@
 
         <!-- 下方：预估利润 + 明细 -->
         <div class="card">
-            <div class="card-title">💰 预估利润明细</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div class="card-title">💰 预估利润明细</div>
+                <button id="exportBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.3s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
+                    📋 导出表格
+                </button>
+            </div>
             <div id="resultArea">
                 <!-- 动态填充表格 -->
                 <div style="overflow-x: auto;">
