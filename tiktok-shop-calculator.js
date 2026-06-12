@@ -374,10 +374,10 @@
 
         SITES.forEach(site => {
             // 使用各站点单独的售价、折扣、优惠券和达人佣金率
-            let sitePrice = sitePrices[site.code] || originalPrice;
-            let siteDiscount = siteDiscounts[site.code] || discount;
-            let siteCoupon = siteCoupons[site.code] || coupon;
-            let siteInfluencerCommission = siteInfluencerCommissions[site.code] || influencerCommission;
+            let sitePrice = siteModified[site.code].price ? sitePrices[site.code] : originalPrice;
+            let siteDiscount = siteModified[site.code].discount ? siteDiscounts[site.code] : discount;
+            let siteCoupon = siteModified[site.code].coupon ? siteCoupons[site.code] : coupon;
+            let siteInfluencerCommission = siteModified[site.code].influencer ? siteInfluencerCommissions[site.code] : influencerCommission;
             let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, siteCoupon, goodsCost, siteInfluencerCommission);
             
             let tr = document.createElement("tr");
