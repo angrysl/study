@@ -46,8 +46,8 @@
         SGD: 1/5.45
     };
 
-    // 历史汇率数据 (用于计算涨跌幅)
-    let historicalRates = {};
+    // 历史汇率数据 (记录最近7天，用于计算涨跌幅)
+    let historicalRates = [];
     
     // 当前选中的站点code
     let currentSite = "VND";
@@ -130,23 +130,6 @@
         return null;
     }
 
-    // 获取历史汇率（用于计算涨跌幅）
-    async function fetchHistoricalRates(daysAgo) {
-        try {
-            const date = new Date();
-            date.setDate(date.getDate() - daysAgo);
-            const dateStr = date.toISOString().split('T')[0];
-            const response = await fetch(`https://api.frankfurter.app/${dateStr}?from=CNY&to=VND,THB,MYR,PHP,SGD`);
-            const data = await response.json();
-            if (data.rates) {
-                return data.rates;
-            }
-        } catch (error) {
-            console.error('Failed to fetch historical rates:', error);
-        }
-        return null;
-    }
-
     // 计算涨跌幅
     function calculateChangePercent(current, previous) {
         if (!previous || previous === 0) return 0;
@@ -172,7 +155,7 @@
         const currentRates = await fetchExchangeRates();
         if (currentRates) {
             // 更新汇率（转换格式：1CNY = X 当地货币）
-            exchangeRates = {
+            const newExchangeRates = {
                 VND: currentRates.VND || 3802,
                 THB: currentRates.THB || 4.7,
                 MYR: currentRates.MYR || 1/1.69,
@@ -180,14 +163,40 @@
                 SGD: currentRates.SGD || 1/5.45
             };
 
-            // 获取历史汇率（1天前和7天前）
-            const history1Day = await fetchHistoricalRates(1);
-            const history7Day = await fetchHistoricalRates(7);
-            
-            historicalRates = {
-                '1day': history1Day || {},
-                '7day': history7Day || {}
+            // 获取今天日期
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+
+            // 创建今日汇率记录
+            const todayRecord = {
+                date: todayStr,
+                rates: { ...newExchangeRates },
+                changes: {}  // 涨跌值（相对于前一天）
             };
+
+            // 如果有历史记录，计算涨跌值
+            if (historicalRates.length > 0) {
+                const lastRecord = historicalRates[historicalRates.length - 1];
+                if (lastRecord.date !== todayStr) {
+                    // 计算每个货币相对于前一天的涨跌值
+                    for (const code of Object.keys(newExchangeRates)) {
+                        const lastRate = lastRecord.rates[code] || newExchangeRates[code];
+                        const change = newExchangeRates[code] - lastRate;
+                        todayRecord.changes[code] = change;
+                    }
+                }
+            }
+
+            // 添加今日记录到历史记录
+            historicalRates.push(todayRecord);
+
+            // 只保留最近7天的记录
+            if (historicalRates.length > 7) {
+                historicalRates = historicalRates.slice(-7);
+            }
+
+            // 更新当前汇率
+            exchangeRates = newExchangeRates;
 
             // 保存到本地存储
             localStorage.setItem('exchangeRates', JSON.stringify(exchangeRates));
@@ -553,11 +562,30 @@
             // 计算涨跌幅
             let change1Day = 0;
             let change7Day = 0;
-            if (historicalRates['1day'] && historicalRates['1day'][site.code]) {
-                change1Day = calculateChangePercent(rate, historicalRates['1day'][site.code]);
-            }
-            if (historicalRates['7day'] && historicalRates['7day'][site.code]) {
-                change7Day = calculateChangePercent(rate, historicalRates['7day'][site.code]);
+            
+            // 使用新的历史记录格式（数组）
+            if (historicalRates.length > 0) {
+                // 1天涨跌值（相对于前一天）
+                const todayRecord = historicalRates[historicalRates.length - 1];
+                if (todayRecord.changes && todayRecord.changes[site.code] !== undefined) {
+                    const lastRate = historicalRates.length > 1 ? 
+                        historicalRates[historicalRates.length - 2].rates[site.code] : rate;
+                    change1Day = calculateChangePercent(rate, lastRate);
+                }
+                
+                // 7天涨跌幅（相对于7天前）
+                if (historicalRates.length >= 7) {
+                    const weekAgoRecord = historicalRates[historicalRates.length - 7];
+                    if (weekAgoRecord.rates && weekAgoRecord.rates[site.code]) {
+                        change7Day = calculateChangePercent(rate, weekAgoRecord.rates[site.code]);
+                    }
+                } else if (historicalRates.length > 1) {
+                    // 如果不足7天，使用最早的记录
+                    const firstRecord = historicalRates[0];
+                    if (firstRecord.rates && firstRecord.rates[site.code]) {
+                        change7Day = calculateChangePercent(rate, firstRecord.rates[site.code]);
+                    }
+                }
             }
             
             // 涨跌幅样式
