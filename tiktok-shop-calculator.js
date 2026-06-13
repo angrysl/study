@@ -2,11 +2,11 @@
     // ---------- 初始化默认数据 (基于excel原始参考) ----------
     // 站点列表
     const SITES = [
-        { code: "VND", name: "越南", currency: "₫", exchangeRate: 3802, defaultTariff: 0 },
-        { code: "THB", name: "泰国", currency: "฿", exchangeRate: 4.7, defaultTariff: 30 },   // 30%
         { code: "MYR", name: "马来", currency: "RM", exchangeRate: 1/1.69, defaultTariff: 0 },
         { code: "PHP", name: "菲律宾", currency: "₱", exchangeRate: 8.65, defaultTariff: 0 },
-        { code: "SGD", name: "新加坡", currency: "S$", exchangeRate: 1/5.45, defaultTariff: 0 }
+        { code: "SGD", name: "新加坡", currency: "S$", exchangeRate: 1/5.45, defaultTariff: 0 },
+        { code: "THB", name: "泰国", currency: "฿", exchangeRate: 4.7, defaultTariff: 30 },   // 30%
+        { code: "VND", name: "越南", currency: "₫", exchangeRate: 3802, defaultTariff: 0 }
     ];
 
     // 子费率配置  (百分比数值，存储为百分数，例如13代表13%)
