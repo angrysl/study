@@ -31,7 +31,7 @@
     // 额外单独关税(泰国30%, 其他0)
     let tariffRates = {
         VND: 0,
-        THB: 30,
+        THB: 0,
         MYR: 0,
         PHP: 0,
         SGD: 0
