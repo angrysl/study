@@ -669,6 +669,41 @@
         if (exportBtn) {
             exportBtn.addEventListener('click', exportTableToClipboard);
         }
+        
+        // 添加全部换品按钮事件
+        const resetAllSitesBtn = document.getElementById('resetAllSitesBtn');
+        if (resetAllSitesBtn) {
+            resetAllSitesBtn.addEventListener('click', resetAllSitesToDefault);
+        }
+    }
+
+    // 全部换品：将所有站点重置为默认基础数据
+    function resetAllSitesToDefault() {
+        // 重置所有站点的修改标志
+        SITES.forEach(site => {
+            siteModified[site.code] = {
+                price: false,
+                discount: false,
+                coupon: false,
+                influencer: false
+            };
+        });
+        
+        // 重新读取基础数据
+        const originalPrice = parseFloat(document.getElementById("originalPrice").value) || 0;
+        const discount = parseFloat(document.getElementById("discount").value) || 10;
+        const coupon = parseFloat(document.getElementById("coupon").value) || 0;
+        const influencerCommission = parseFloat(document.getElementById("influencerCommission").value) || 0;
+        
+        // 重新构建表格
+        const weight = parseFloat(document.getElementById("weight").value) || 0;
+        const freightAgent = parseFloat(document.getElementById("freightAgent").value) || 0;
+        const goodsCost = parseFloat(document.getElementById("goodsCost").value) || 0;
+        
+        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission);
+        
+        // 显示提示
+        showToast('✅ 已全部换品，所有站点已重置为默认数据！');
     }
 
     // 导出表格到剪贴板
