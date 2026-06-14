@@ -63,11 +63,11 @@
 
     // 各站点单独折扣范围
     let siteDiscounts = {
-        VND: 5,
-        THB: 5,
-        MYR: 5,
-        PHP: 5,
-        SGD: 5
+        VND: 6,
+        THB: 6,
+        MYR: 6,
+        PHP: 6,
+        SGD: 6
     };
 
     // 各站点单独优惠券 (人民币)
@@ -336,7 +336,7 @@
     function refreshAll() {
         // 读取表单
         let originalPrice = parseFloat(document.getElementById("originalPrice").value) || 0;
-        let discount = parseFloat(document.getElementById("discount").value) || 10;
+        let discount = parseFloat(document.getElementById("discount")?.value) || 6;  // 默认6折
         let weight = parseFloat(document.getElementById("weight").value) || 0;
         let freightAgent = parseFloat(document.getElementById("freightAgent").value) || 0;
         let coupon = parseFloat(document.getElementById("coupon").value) || 0;
@@ -347,7 +347,6 @@
         // 折扣范围限制1-10
         if (discount < 1) discount = 1;
         if (discount > 10) discount = 10;
-        document.getElementById("discount").value = discount;
 
         // 达人佣金率范围限制0-50
         if (influencerCommission < 0) influencerCommission = 0;
@@ -700,7 +699,7 @@
 
     // 监听基础输入
     function bindBasicInputs() {
-        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost', 'influencerCommission', 'adCost'];
+        const inputs = ['originalPrice', 'weight', 'freightAgent', 'coupon', 'goodsCost', 'influencerCommission', 'adCost'];
         inputs.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => refreshAll());
@@ -770,7 +769,7 @@
         
         // 重新读取基础数据
         const originalPrice = parseFloat(document.getElementById("originalPrice").value) || 0;
-        const discount = parseFloat(document.getElementById("discount").value) || 10;
+        const discount = parseFloat(document.getElementById("discount")?.value) || 6;  // 默认6折
         const coupon = parseFloat(document.getElementById("coupon").value) || 0;
         const influencerCommission = parseFloat(document.getElementById("influencerCommission").value) || 0;
         const adCost = parseFloat(document.getElementById("adCost").value) || 0;
