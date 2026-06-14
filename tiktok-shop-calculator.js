@@ -303,9 +303,12 @@
         // 7. 达人佣金 (折后价 × 达人佣金率)
         let influencerCommission = discountedPrice * (influencerCommissionRate / 100);
 
-        // 8. 净利润（扣除广告成本后）
-        let profitLocal = discountedPrice - platformFee - customsDuty - shippingLocal - agentLocal - coupon - goodsLocal - influencerCommission;
-        let profitCNY = profitLocal / exchange;
+        // 8. 广告成本换算当地货币
+        let adCostLocal = adCostCNY * exchange;
+
+        // 9. 净利润（扣除广告成本后）
+        let profitLocal = discountedPrice - platformFee - customsDuty - shippingLocal - agentLocal - coupon - goodsLocal - influencerCommission - adCostLocal;
+        let profitCNY = (discountedPrice - platformFee - customsDuty - shippingLocal - agentLocal - coupon - goodsLocal - influencerCommission) / exchange;
         // 扣除广告成本后的人民币利润
         let profitAfterAdCNY = profitCNY - adCostCNY;
 
@@ -319,6 +322,7 @@
             goodsLocal,
             influencerCommission,
             adCost: adCostCNY,
+            adCostLocal: adCostLocal,
             profitLocal,
             profitCNY,
             profitAfterAdCNY,
