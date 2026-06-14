@@ -126,8 +126,9 @@
     // 获取实时汇率
     async function fetchExchangeRates() {
         try {
-            // 使用Frankfurter API获取汇率（CNY为基准）
-            const response = await fetch('https://api.frankfurter.app/latest?from=CNY&to=VND,THB,MYR,PHP,SGD');
+            // 使用ExchangeRate Host API获取汇率（CNY为基准）
+            // 免费API，每日更新，无需API key
+            const response = await fetch('https://api.exchangerate.host/latest?base=CNY&symbols=VND,THB,MYR,PHP,SGD');
             const data = await response.json();
             
             if (data.rates) {
