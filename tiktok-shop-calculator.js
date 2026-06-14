@@ -439,7 +439,7 @@
                 <td title="货品成本¥${goodsCost} × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.goodsLocal, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.goodsLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.goodsLocal / result.exchangeRate).toFixed(2)}</div></td>
                 <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × ${siteInfluencerCommission}%达人佣金 = ${formatCurrency(result.influencerCommission, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.influencerCommission, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.influencerCommission / result.exchangeRate).toFixed(2)}</div></td>
                 <td style="font-weight: bold; color: ${result.profitLocal >= 0 ? '#00b42a' : '#fe2c55'};" title="折后价${formatCurrency(result.discountedPrice, site.code)} - 平台费${formatCurrency(result.platformFee, site.code)} - 关税${formatCurrency(result.customsDuty, site.code)} - 物流${formatCurrency(result.shippingLocal, site.code)} - 货代${formatCurrency(result.agentLocal, site.code)} - 优惠券${formatCurrency(result.coupon, site.code)} - 货品${formatCurrency(result.goodsLocal, site.code)} - 达人佣金${formatCurrency(result.influencerCommission, site.code)} - 广告成本${siteAdCost} = ${formatCurrency(result.profitLocal, site.code)}">${formatCurrency(result.profitLocal, site.code)}</td>
-                <td style="font-weight: bold; color: ${result.profitCNY >= 0 ? '#00b42a' : '#fe2c55'};" title="净利润${formatCurrency(result.profitLocal, site.code)} ÷ ${result.exchangeRate.toFixed(4)}汇率 = ¥${result.profitCNY.toFixed(2)}">¥ ${result.profitCNY.toFixed(2)}</td>
+                <td style="font-weight: bold; color: ${result.profitAfterAdCNY >= 0 ? '#00b42a' : '#fe2c55'};" title="扣除广告成本后净利润：¥${result.profitCNY.toFixed(2)} - 广告成本${siteAdCost} = ¥${result.profitAfterAdCNY.toFixed(2)}">¥ ${result.profitAfterAdCNY.toFixed(2)}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -509,10 +509,10 @@
             });
         });
         
-        // 绑定广告成本输入
+        // 绑定广告成本输入（实时更新）
         const adCostInputs = document.querySelectorAll('.site-adcost-input');
         adCostInputs.forEach(input => {
-            input.addEventListener('change', function() {
+            input.addEventListener('input', function() {
                 const siteCode = this.dataset.site;
                 let value = parseFloat(this.value) || 0;
                 // 限制非负
