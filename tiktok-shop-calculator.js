@@ -88,13 +88,22 @@
         SGD: 0
     };
 
+    // 各站点单独广告成本 (人民币)
+    let siteAdCosts = {
+        VND: 0,
+        THB: 0,
+        MYR: 0,
+        PHP: 0,
+        SGD: 0
+    };
+
     // 标记哪些站点被手动修改过
     let siteModified = {
-        VND: { price: false, discount: false, coupon: false, influencer: false },
-        THB: { price: false, discount: false, coupon: false, influencer: false },
-        MYR: { price: false, discount: false, coupon: false, influencer: false },
-        PHP: { price: false, discount: false, coupon: false, influencer: false },
-        SGD: { price: false, discount: false, coupon: false, influencer: false }
+        VND: { price: false, discount: false, coupon: false, influencer: false, adCost: false },
+        THB: { price: false, discount: false, coupon: false, influencer: false, adCost: false },
+        MYR: { price: false, discount: false, coupon: false, influencer: false, adCost: false },
+        PHP: { price: false, discount: false, coupon: false, influencer: false, adCost: false },
+        SGD: { price: false, discount: false, coupon: false, influencer: false, adCost: false }
     };
 
     // 动态费率存储 (百分比数值数组)
@@ -257,7 +266,7 @@
     }
 
     // 核心利润计算，返回所有明细对象 (当地货币)
-    function calculateProfit(siteCode, originalPriceCNY, discountVal, weightGram, freightAgentCNY, couponCNY, goodsCostCNY, influencerCommissionRate) {
+    function calculateProfit(siteCode, originalPriceCNY, discountVal, weightGram, freightAgentCNY, couponCNY, goodsCostCNY, influencerCommissionRate, adCostCNY = 0) {
         let exchange = getExchangeRate(siteCode);
         let discountFactor = discountVal / 10;
         // 人民币售价先换算成当地货币，再计算折后价
@@ -294,8 +303,11 @@
         // 7. 达人佣金 (折后价 × 达人佣金率)
         let influencerCommission = discountedPrice * (influencerCommissionRate / 100);
 
+        // 8. 净利润（扣除广告成本后）
         let profitLocal = discountedPrice - platformFee - customsDuty - shippingLocal - agentLocal - coupon - goodsLocal - influencerCommission;
         let profitCNY = profitLocal / exchange;
+        // 扣除广告成本后的人民币利润
+        let profitAfterAdCNY = profitCNY - adCostCNY;
 
         return {
             discountedPrice,
@@ -306,8 +318,10 @@
             coupon,
             goodsLocal,
             influencerCommission,
+            adCost: adCostCNY,
             profitLocal,
             profitCNY,
+            profitAfterAdCNY,
             exchangeRate: exchange,
             discountedPriceCNY: discountedPrice / exchange
         };
@@ -323,6 +337,7 @@
         let coupon = parseFloat(document.getElementById("coupon").value) || 0;
         let goodsCost = parseFloat(document.getElementById("goodsCost").value) || 0;
         let influencerCommission = parseFloat(document.getElementById("influencerCommission").value) || 0;
+        let adCost = parseFloat(document.getElementById("adCost").value) || 0;
 
         // 折扣范围限制1-10
         if (discount < 1) discount = 1;
@@ -334,15 +349,19 @@
         if (influencerCommission > 50) influencerCommission = 50;
         document.getElementById("influencerCommission").value = influencerCommission;
 
+        // 广告成本范围限制 >= 0
+        if (adCost < 0) adCost = 0;
+        document.getElementById("adCost").value = adCost;
+
         // 生成表格，显示所有站点的数据
-        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission);
+        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission, adCost);
         
         // 更新表格中的输入框值（如果站点没有单独设置过，则显示基础值）
-        updateTableInputs(originalPrice, discount, coupon, influencerCommission);
+        updateTableInputs(originalPrice, discount, coupon, influencerCommission, adCost);
     }
 
     // 更新表格中的输入框值
-    function updateTableInputs(originalPrice, discount, coupon, influencerCommission) {
+    function updateTableInputs(originalPrice, discount, coupon, influencerCommission, adCost) {
         SITES.forEach(site => {
             // 如果站点没有单独修改过，则使用基础值更新输入框
             if (!siteModified[site.code].price) {
@@ -373,11 +392,18 @@
                     siteInfluencerCommissions[site.code] = influencerCommission;
                 }
             }
+            if (!siteModified[site.code].adCost) {
+                const adCostInput = document.querySelector(`.site-adcost-input[data-site="${site.code}"]`);
+                if (adCostInput) {
+                    adCostInput.value = adCost;
+                    siteAdCosts[site.code] = adCost;
+                }
+            }
         });
     }
 
     // 构建利润表格
-    function buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission) {
+    function buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission, adCost) {
         const tbody = document.getElementById("profitTableBody");
         tbody.innerHTML = "";
 
@@ -387,11 +413,14 @@
             let siteDiscount = siteModified[site.code].discount ? siteDiscounts[site.code] : discount;
             let siteCoupon = siteModified[site.code].coupon ? siteCoupons[site.code] : coupon;
             let siteInfluencerCommission = siteModified[site.code].influencer ? siteInfluencerCommissions[site.code] : influencerCommission;
-            let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, siteCoupon, goodsCost, siteInfluencerCommission);
+            let siteAdCost = siteModified[site.code].adCost ? siteAdCosts[site.code] : adCost;
+            let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, siteCoupon, goodsCost, siteInfluencerCommission, siteAdCost);
             
             let tr = document.createElement("tr");
             // 计算当地售价（人民币售价 × 汇率）
             let localPrice = sitePrice * result.exchangeRate;
+            // 计算广告ROI
+            let adROI = siteAdCost > 0 ? (result.discountedPriceCNY / siteAdCost).toFixed(2) : (siteAdCost === 0 ? '—' : '0.00');
             tr.innerHTML = `
                 <td style="font-weight: 600;">${site.name}</td>
                 <td><input type="number" class="site-price-input" data-site="${site.code}" value="${sitePrice}" step="1" style="width: 80px; padding: 4px; text-align: center;" title="基础售价"></td>
@@ -399,6 +428,8 @@
                 <td><input type="number" class="site-discount-input" data-site="${site.code}" value="${siteDiscount}" min="1" max="10" step="1" style="width: 60px; padding: 4px; text-align: center;" title="1=1折,10=不打折"></td>
                 <td><input type="number" class="site-coupon-input" data-site="${site.code}" value="${siteCoupon}" step="0.5" style="width: 70px; padding: 4px; text-align: center;" title="优惠券金额(人民币)"></td>
                 <td><input type="number" class="site-influencer-input" data-site="${site.code}" value="${siteInfluencerCommission}" min="0" max="50" step="0.5" style="width: 70px; padding: 4px; text-align: center;" title="达人佣金率(%)"></td>
+                <td><input type="number" class="site-adcost-input" data-site="${site.code}" value="${siteAdCost}" step="0.5" style="width: 80px; padding: 4px; text-align: center;" title="广告成本(人民币)"></td>
+                <td style="font-weight: bold; color: ${adROI === '—' ? '#333' : (parseFloat(adROI) >= 1 ? '#00b42a' : '#fe2c55'};">${adROI}</td>
                 <td title="售价¥${sitePrice} × (${siteDiscount}折扣/10) × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.discountedPrice, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.discountedPrice, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${result.discountedPriceCNY.toFixed(2)}</div></td>
                 <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × 合计费率${(getTotalFeeRate(site.code)*100).toFixed(2)}% = ${formatCurrency(result.platformFee, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.platformFee, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.platformFee / result.exchangeRate).toFixed(2)}</div></td>
                 <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × 关税${(getTariffRate(site.code)*100).toFixed(2)}% = ${formatCurrency(result.customsDuty, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.customsDuty, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.customsDuty / result.exchangeRate).toFixed(2)}</div></td>
@@ -407,7 +438,7 @@
                 <td title="优惠券¥${siteCoupon} × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.coupon, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.coupon, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.coupon / result.exchangeRate).toFixed(2)}</div></td>
                 <td title="货品成本¥${goodsCost} × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.goodsLocal, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.goodsLocal, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.goodsLocal / result.exchangeRate).toFixed(2)}</div></td>
                 <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × ${siteInfluencerCommission}%达人佣金 = ${formatCurrency(result.influencerCommission, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.influencerCommission, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.influencerCommission / result.exchangeRate).toFixed(2)}</div></td>
-                <td style="font-weight: bold; color: ${result.profitLocal >= 0 ? '#00b42a' : '#fe2c55'};" title="折后价${formatCurrency(result.discountedPrice, site.code)} - 平台费${formatCurrency(result.platformFee, site.code)} - 关税${formatCurrency(result.customsDuty, site.code)} - 物流${formatCurrency(result.shippingLocal, site.code)} - 货代${formatCurrency(result.agentLocal, site.code)} - 优惠券${formatCurrency(result.coupon, site.code)} - 货品${formatCurrency(result.goodsLocal, site.code)} - 达人佣金${formatCurrency(result.influencerCommission, site.code)} = ${formatCurrency(result.profitLocal, site.code)}">${formatCurrency(result.profitLocal, site.code)}</td>
+                <td style="font-weight: bold; color: ${result.profitLocal >= 0 ? '#00b42a' : '#fe2c55'};" title="折后价${formatCurrency(result.discountedPrice, site.code)} - 平台费${formatCurrency(result.platformFee, site.code)} - 关税${formatCurrency(result.customsDuty, site.code)} - 物流${formatCurrency(result.shippingLocal, site.code)} - 货代${formatCurrency(result.agentLocal, site.code)} - 优惠券${formatCurrency(result.coupon, site.code)} - 货品${formatCurrency(result.goodsLocal, site.code)} - 达人佣金${formatCurrency(result.influencerCommission, site.code)} - 广告成本${siteAdCost} = ${formatCurrency(result.profitLocal, site.code)}">${formatCurrency(result.profitLocal, site.code)}</td>
                 <td style="font-weight: bold; color: ${result.profitCNY >= 0 ? '#00b42a' : '#fe2c55'};" title="净利润${formatCurrency(result.profitLocal, site.code)} ÷ ${result.exchangeRate.toFixed(4)}汇率 = ¥${result.profitCNY.toFixed(2)}">¥ ${result.profitCNY.toFixed(2)}</td>
             `;
             tbody.appendChild(tr);
@@ -474,6 +505,21 @@
                 this.value = value;
                 siteInfluencerCommissions[siteCode] = value;
                 siteModified[siteCode].influencer = true;  // 标记为已修改
+                refreshAll();
+            });
+        });
+        
+        // 绑定广告成本输入
+        const adCostInputs = document.querySelectorAll('.site-adcost-input');
+        adCostInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const siteCode = this.dataset.site;
+                let value = parseFloat(this.value) || 0;
+                // 限制非负
+                if (value < 0) value = 0;
+                this.value = value;
+                siteAdCosts[siteCode] = value;
+                siteModified[siteCode].adCost = true;  // 标记为已修改
                 refreshAll();
             });
         });
@@ -649,7 +695,7 @@
 
     // 监听基础输入
     function bindBasicInputs() {
-        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost', 'influencerCommission'];
+        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost', 'influencerCommission', 'adCost'];
         inputs.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => refreshAll());
@@ -712,7 +758,8 @@
                 price: false,
                 discount: false,
                 coupon: false,
-                influencer: false
+                influencer: false,
+                adCost: false
             };
         });
         
@@ -721,13 +768,14 @@
         const discount = parseFloat(document.getElementById("discount").value) || 10;
         const coupon = parseFloat(document.getElementById("coupon").value) || 0;
         const influencerCommission = parseFloat(document.getElementById("influencerCommission").value) || 0;
+        const adCost = parseFloat(document.getElementById("adCost").value) || 0;
         
         // 重新构建表格
         const weight = parseFloat(document.getElementById("weight").value) || 0;
         const freightAgent = parseFloat(document.getElementById("freightAgent").value) || 0;
         const goodsCost = parseFloat(document.getElementById("goodsCost").value) || 0;
         
-        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission);
+        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission, adCost);
         
         // 显示提示
         showToast('✅ 已全部换品，所有站点已重置为默认数据！');

@@ -53,11 +53,14 @@
                     <label>👤 达人佣金率 (%)</label>
                     <input type="number" id="influencerCommission" value="0" min="0" max="50" step="0.5">
                 </div>
+                <div class="form-group">
+                    <label>💸 广告成本 (人民币)</label>
+                    <input type="number" id="adCost" value="0" step="0.5">
+                </div>
             </div>
             <div class="note note-highlight">
-                💡 公式：利润 = 折后价 - 关税 - 平台费 - 物流费 - 货代成本(换算后) - 优惠券 - 货品成本(换算后) - 达人佣金<br>
-                平台费 = 折后价 × 合计费率 (佣金+交易费+增值税+其他)，泰国额外扣除关税，所有费率/汇率可在下方表格实时修改。
-            </div>
+                💡 公式：利润 = 折后价 - 关税 - 平台费 - 物流费 - 货代成本(换算后) - 优惠券 - 货品成本(换算后) - 达人佣金 - 广告成本<br>
+                平台费 = 折后价 × 合计费率 (佣金+交易费+增值税+其他)，泰国额外扣除关税，所有费率/汇率可在下方表格实时修改。</div>
         </div>
 
         <!-- 下方：预估利润 + 明细 -->
@@ -85,6 +88,8 @@
                                 <th>折扣</th>
                                 <th>优惠券(人民币)</th>
                                 <th>达人佣金率(%)</th>
+                                <th>广告成本(人民币)</th>
+                                <th>广告ROI</th>
                                 <th title="售价(人民币) × 折扣因子 × 汇率">折后价</th>
                                 <th title="折后价(当地) × 合计费率">平台费</th>
                                 <th title="折后价(当地) × 关税税率">关税</th>
