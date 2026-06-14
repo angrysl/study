@@ -88,31 +88,13 @@
         SGD: 0
     };
 
-    // 各站点单独广告ROI
-    let siteAdROIs = {
-        VND: 2,
-        THB: 2,
-        MYR: 2,
-        PHP: 2,
-        SGD: 2
-    };
-
-    // 各站点单独广告成本 (人民币)
-    let siteAdCosts = {
-        VND: 0,
-        THB: 0,
-        MYR: 0,
-        PHP: 0,
-        SGD: 0
-    };
-
     // 标记哪些站点被手动修改过
     let siteModified = {
-        VND: { price: false, discount: false, coupon: false, influencer: false, adROI: false, adCost: false },
-        THB: { price: false, discount: false, coupon: false, influencer: false, adROI: false, adCost: false },
-        MYR: { price: false, discount: false, coupon: false, influencer: false, adROI: false, adCost: false },
-        PHP: { price: false, discount: false, coupon: false, influencer: false, adROI: false, adCost: false },
-        SGD: { price: false, discount: false, coupon: false, influencer: false, adROI: false, adCost: false }
+        VND: { price: false, discount: false, coupon: false, influencer: false },
+        THB: { price: false, discount: false, coupon: false, influencer: false },
+        MYR: { price: false, discount: false, coupon: false, influencer: false },
+        PHP: { price: false, discount: false, coupon: false, influencer: false },
+        SGD: { price: false, discount: false, coupon: false, influencer: false }
     };
 
     // 动态费率存储 (百分比数值数组)
@@ -341,8 +323,6 @@
         let coupon = parseFloat(document.getElementById("coupon").value) || 0;
         let goodsCost = parseFloat(document.getElementById("goodsCost").value) || 0;
         let influencerCommission = parseFloat(document.getElementById("influencerCommission").value) || 0;
-        let adROI = parseFloat(document.getElementById("adROI").value) || 2;
-        let adCost = parseFloat(document.getElementById("adCost").value) || 0;
 
         // 折扣范围限制1-10
         if (discount < 1) discount = 1;
@@ -354,23 +334,15 @@
         if (influencerCommission > 50) influencerCommission = 50;
         document.getElementById("influencerCommission").value = influencerCommission;
 
-        // 广告ROI范围限制 >= 0
-        if (adROI < 0) adROI = 0;
-        document.getElementById("adROI").value = adROI;
-
-        // 广告成本范围限制 >= 0
-        if (adCost < 0) adCost = 0;
-        document.getElementById("adCost").value = adCost;
-
         // 生成表格，显示所有站点的数据
-        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission, adROI, adCost);
+        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission);
         
         // 更新表格中的输入框值（如果站点没有单独设置过，则显示基础值）
-        updateTableInputs(originalPrice, discount, coupon, influencerCommission, adROI, adCost);
+        updateTableInputs(originalPrice, discount, coupon, influencerCommission);
     }
 
     // 更新表格中的输入框值
-    function updateTableInputs(originalPrice, discount, coupon, influencerCommission, adROI, adCost) {
+    function updateTableInputs(originalPrice, discount, coupon, influencerCommission) {
         SITES.forEach(site => {
             // 如果站点没有单独修改过，则使用基础值更新输入框
             if (!siteModified[site.code].price) {
@@ -401,25 +373,11 @@
                     siteInfluencerCommissions[site.code] = influencerCommission;
                 }
             }
-            if (!siteModified[site.code].adROI) {
-                const adROIInput = document.querySelector(`.site-adroi-input[data-site="${site.code}"]`);
-                if (adROIInput) {
-                    adROIInput.value = adROI;
-                    siteAdROIs[site.code] = adROI;
-                }
-            }
-            if (!siteModified[site.code].adCost) {
-                const adCostInput = document.querySelector(`.site-adcost-input[data-site="${site.code}"]`);
-                if (adCostInput) {
-                    adCostInput.value = adCost;
-                    siteAdCosts[site.code] = adCost;
-                }
-            }
         });
     }
 
     // 构建利润表格
-    function buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission, adROI, adCost) {
+    function buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission) {
         const tbody = document.getElementById("profitTableBody");
         tbody.innerHTML = "";
 
@@ -429,8 +387,6 @@
             let siteDiscount = siteModified[site.code].discount ? siteDiscounts[site.code] : discount;
             let siteCoupon = siteModified[site.code].coupon ? siteCoupons[site.code] : coupon;
             let siteInfluencerCommission = siteModified[site.code].influencer ? siteInfluencerCommissions[site.code] : influencerCommission;
-            let siteAdROI = siteModified[site.code].adROI ? siteAdROIs[site.code] : adROI;
-            let siteAdCost = siteModified[site.code].adCost ? siteAdCosts[site.code] : adCost;
             let result = calculateProfit(site.code, sitePrice, siteDiscount, weight, freightAgent, siteCoupon, goodsCost, siteInfluencerCommission);
             
             let tr = document.createElement("tr");
@@ -443,8 +399,6 @@
                 <td><input type="number" class="site-discount-input" data-site="${site.code}" value="${siteDiscount}" min="1" max="10" step="1" style="width: 60px; padding: 4px; text-align: center;" title="1=1折,10=不打折"></td>
                 <td><input type="number" class="site-coupon-input" data-site="${site.code}" value="${siteCoupon}" step="0.5" style="width: 70px; padding: 4px; text-align: center;" title="优惠券金额(人民币)"></td>
                 <td><input type="number" class="site-influencer-input" data-site="${site.code}" value="${siteInfluencerCommission}" min="0" max="50" step="0.5" style="width: 70px; padding: 4px; text-align: center;" title="达人佣金率(%)"></td>
-                <td><input type="number" class="site-adroi-input" data-site="${site.code}" value="${siteAdROI}" step="0.1" style="width: 60px; padding: 4px; text-align: center;" title="广告ROI"></td>
-                <td><input type="number" class="site-adcost-input" data-site="${site.code}" value="${siteAdCost}" step="0.5" style="width: 80px; padding: 4px; text-align: center;" title="广告成本(人民币)"></td>
                 <td title="售价¥${sitePrice} × (${siteDiscount}折扣/10) × ${result.exchangeRate.toFixed(4)}汇率 = ${formatCurrency(result.discountedPrice, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.discountedPrice, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${result.discountedPriceCNY.toFixed(2)}</div></td>
                 <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × 合计费率${(getTotalFeeRate(site.code)*100).toFixed(2)}% = ${formatCurrency(result.platformFee, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.platformFee, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.platformFee / result.exchangeRate).toFixed(2)}</div></td>
                 <td title="折后价${formatCurrency(result.discountedPrice, site.code)} × 关税${(getTariffRate(site.code)*100).toFixed(2)}% = ${formatCurrency(result.customsDuty, site.code)}"><div style="font-size: 0.85rem;">${formatCurrency(result.customsDuty, site.code)}</div><div style="font-size: 0.7rem; color: #86909c;">¥ ${(result.customsDuty / result.exchangeRate).toFixed(2)}</div></td>
@@ -520,36 +474,6 @@
                 this.value = value;
                 siteInfluencerCommissions[siteCode] = value;
                 siteModified[siteCode].influencer = true;  // 标记为已修改
-                refreshAll();
-            });
-        });
-        
-        // 绑定广告ROI输入
-        const adROIInputs = document.querySelectorAll('.site-adroi-input');
-        adROIInputs.forEach(input => {
-            input.addEventListener('change', function() {
-                const siteCode = this.dataset.site;
-                let value = parseFloat(this.value) || 0;
-                // 限制非负
-                if (value < 0) value = 0;
-                this.value = value;
-                siteAdROIs[siteCode] = value;
-                siteModified[siteCode].adROI = true;  // 标记为已修改
-                refreshAll();
-            });
-        });
-        
-        // 绑定广告成本输入
-        const adCostInputs = document.querySelectorAll('.site-adcost-input');
-        adCostInputs.forEach(input => {
-            input.addEventListener('change', function() {
-                const siteCode = this.dataset.site;
-                let value = parseFloat(this.value) || 0;
-                // 限制非负
-                if (value < 0) value = 0;
-                this.value = value;
-                siteAdCosts[siteCode] = value;
-                siteModified[siteCode].adCost = true;  // 标记为已修改
                 refreshAll();
             });
         });
@@ -725,7 +649,7 @@
 
     // 监听基础输入
     function bindBasicInputs() {
-        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost', 'influencerCommission', 'adROI', 'adCost'];
+        const inputs = ['originalPrice', 'discount', 'weight', 'freightAgent', 'coupon', 'goodsCost', 'influencerCommission'];
         inputs.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => refreshAll());
@@ -788,9 +712,7 @@
                 price: false,
                 discount: false,
                 coupon: false,
-                influencer: false,
-                adROI: false,
-                adCost: false
+                influencer: false
             };
         });
         
@@ -799,15 +721,13 @@
         const discount = parseFloat(document.getElementById("discount").value) || 10;
         const coupon = parseFloat(document.getElementById("coupon").value) || 0;
         const influencerCommission = parseFloat(document.getElementById("influencerCommission").value) || 0;
-        const adROI = parseFloat(document.getElementById("adROI").value) || 2;
-        const adCost = parseFloat(document.getElementById("adCost").value) || 0;
         
         // 重新构建表格
         const weight = parseFloat(document.getElementById("weight").value) || 0;
         const freightAgent = parseFloat(document.getElementById("freightAgent").value) || 0;
         const goodsCost = parseFloat(document.getElementById("goodsCost").value) || 0;
         
-        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission, adROI, adCost);
+        buildProfitTable(originalPrice, discount, weight, freightAgent, coupon, goodsCost, influencerCommission);
         
         // 显示提示
         showToast('✅ 已全部换品，所有站点已重置为默认数据！');
